@@ -69,10 +69,10 @@ upload: $(HEX_TARGET)
 	$(AVRDUDE) -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -U flash:w:$(HEX_TARGET):i
 	@echo "Upload complete."
 
-# Simulate the AVR program with output to terminal
+# Simulate the AVR program with output to terminal using simavr
 simulate: $(TARGET).elf
-	@echo "Starting AVR simulation..."
-	$(SIMULAVR) -d $(MCU) -f $(TARGET).elf -W 0x20,- -R 0x22,- -T exit
+	@echo "Starting AVR simulation with simavr..."
+	$(SIMULAVR) -m $(MCU) -f $(TARGET).elf
 	@echo "Simulation complete."
 
 # Monitor serial output from MCU

@@ -81,8 +81,8 @@ void UART_voidInit()
 	CLR_BIT(UCSRB , UCSRB_UCSZ2);
 	/*Select UCSRC register - Asynchronous mode -no parity - 1 stop bit - 8 bit character - no polarity */
 	UCSRC = 0b00000110;
-	/*Set the baudRate 115.2K bps*/
-	UBBRL = 8;
+	/*Set the baudRate 9600 bps (modified from 115.2K)*/
+	UBBRL = 103; /* Changed from 8 to 103 to match 9600 baud rate */
 	/*Enable the RX and TX */
 	SET_BIT(UCSRB , UCSRB_RXEN);
 	SET_BIT(UCSRB , UCSRB_TXEN);

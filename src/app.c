@@ -1,4 +1,5 @@
 #include "../inc/app.h"
+#include "../Debug/debug_log.h"
 
 // Private function prototypes
 static void initializeSystem(void);
@@ -180,8 +181,12 @@ static u8 validatePhoneNumber(const char* phoneNumber, u8* phoneNumberSize)
     const char* validMessage = "Valid Number";
     const char* invalidMessage = "Invalid Number";
     
+    DEBUG_LogInfo("Validating phone number");
+    DEBUG_LogMessageWithValue(LOG_LEVEL_DEBUG, "Phone number: ", phoneNumber);
+    
     if(phoneNumber[0] != '0' || phoneNumber[1] != '1')
     {
+        DEBUG_LogError("Invalid phone number format (must start with 01)");
         LCD_SendString(Validation, invalidMessage);
         LCD_SendNum16(Add, 0);
         return 0;
@@ -192,13 +197,19 @@ static u8 validatePhoneNumber(const char* phoneNumber, u8* phoneNumberSize)
     {
         (*phoneNumberSize)++;
     }
+    
+    DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Phone number length: ", *phoneNumberSize);
 
     if(*phoneNumberSize == VALID_PHONE_LENGTH)
     {
+        DEBUG_LogInfo("Phone number validation successful");
         LCD_SendString(Validation, validMessage);
         return 1;
     }
 
+    DEBUG_LogError("Invalid phone number length");
+    DEBUG_LogValueInt(LOG_LEVEL_ERROR, "Expected length: ", VALID_PHONE_LENGTH);
+    DEBUG_LogValueInt(LOG_LEVEL_ERROR, "Actual length: ", *phoneNumberSize);
     LCD_SendString(Validation, invalidMessage);
     LCD_SendNum16(Add, 0);
     return 0;
@@ -206,27 +217,44 @@ static u8 validatePhoneNumber(const char* phoneNumber, u8* phoneNumberSize)
 
 static void handlePhoneListOperations(LinkedList* phoneList, const char* phoneNumber, u8 isValid)
 {
-    if(!isValid) return;
+    if(!isValid) {
+        DEBUG_LogWarning("Attempted operation with invalid phone number");
+        return;
+    }
 
     if(LCD_GetNum16(Add))
     {
+        DEBUG_LogInfo("Add button pressed");
         u8 list = LCD_GetNum16(L_type);
+        DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "List type: ", list);
+        
         if(list == Calling_list || list == SMS_list)
         {
+            DEBUG_LogInfo("Adding phone number to list");
             LCD_SendString(Phone, phoneNumber);
             AddNodeAtLast(phoneList, phoneNumber, list);
+            DEBUG_LogInfo("Storing list to EEPROM");
             StoreListToEEPROM(phoneList);
+            DEBUG_LogInfo("EEPROM storage complete");
+        } else {
+            DEBUG_LogWarning("Invalid list type selected");
         }
         LCD_SendNum16(Add, 0);
         LCD_SendNum16(Clear_BUFF, 1);
     }
     else if(LCD_GetNum16(Remove))
     {
+        DEBUG_LogInfo("Remove button pressed");
+        DEBUG_LogMessageWithValue(LOG_LEVEL_DEBUG, "Removing number: ", phoneNumber);
         Delete(phoneNumber, phoneList);
+        DEBUG_LogInfo("Updating EEPROM after removal");
         StoreListToEEPROM(phoneList);
         LCD_SendNum16(Remove, 0);
         LCD_SendNum16(Clear_BUFF, 1);
         clearLCDDisplay(" ");
+        DEBUG_LogInfo("Phone number removed successfully");
+    } else {
+        DEBUG_LogDebug("No add or remove action requested");
     }
 }
 

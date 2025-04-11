@@ -1,8 +1,8 @@
 #ifndef DEBUG_LOG_H_
 #define DEBUG_LOG_H_
 
-#include "../STD_TYPES.h"
-#include "../../MCAL/UART/UART_Interface.h"
+#include "../Utilities/STD_TYPES.h"
+#include "../MCAL/UART/UART_Interface.h"
 
 #define DEBUG_MODE
 // Define debug levels

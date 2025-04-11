@@ -1,0 +1,43 @@
+{
+    "servers": {
+      "pdf-reader": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "-v",
+          "/home/omar/Documents/EEBUS-C:/pdfs",
+          "mcp/pdf-reader"
+        ],
+        "disabled": false,
+        "autoApprove": []
+      },
+      "github": {
+            "command": "docker",
+            "args": [
+              "run",
+              "-i",
+              "--rm",
+              "-e",
+              "GITHUB_PERSONAL_ACCESS_TOKEN",
+              "ghcr.io/github/github-mcp-server"
+            ],
+            "env": {
+              "GITHUB_PERSONAL_ACCESS_TOKEN": "<github_token>"
+            }
+      },
+      "filesystem": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "/home/omar/Documents/EEBUS-C",
+          "/home/omar/Documents/eebus-go",
+          "/home/omar/Documents/EEBUS-Hub-Core",
+          "/home/omar/Documents/HEMS_Mgr/KEO/src/spine/src/keo_spine"
+        ]
+      },
+  
+    }
+  }

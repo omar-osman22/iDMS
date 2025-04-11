@@ -5,11 +5,11 @@
 static void initializeSystem(void);
 static void clearLCDDisplay(const char* clear);
 static u8 validatePhoneNumber(const char* phoneNumber, u8* phoneNumberSize);
-static void handlePhoneListOperations(LinkedList* phoneList, const char* phoneNumber, u8 isValid);
+static void handlePhoneListOperations(List* phoneList, const char* phoneNumber, u8 isValid);
 static void updateSensorReadings(SystemReadings* readings);
 static void updateSensorFilter(SensorReading* sensor, f32 newReading);
 static void sendAlarmMessage(const u8* phoneNumber, const u8* message);
-static void printListToLCD(LinkedList* phoneList);
+static void printListToLCD(List* phoneList);
 static void checkSafetyThresholds(AppState* state); // Added missing function prototype
 
 void APP_Init(void)
@@ -140,10 +140,10 @@ static void checkSafetyThresholds(AppState* state)
         
         // Send alarm message if enough time has passed
         if (state->readings.lastAlarmTime == 0 || state->readings.lastAlarmTime + ALARM_DELAY_MS <= state->currentTime) {
-            Node* current = state->phoneList->head;
+            Node* current = state->phoneList.Head;  // Changed from ->head to .Head
             while (current != NULL) {
-                sendAlarmMessage((const u8*)current->data, alarmMessage);
-                current = current->next;
+                sendAlarmMessage((const u8*)current->value, alarmMessage);  // Changed from ->data to ->value
+                current = current->Next;  // Changed from ->next to ->Next
             }
             state->readings.lastAlarmTime = state->currentTime;
         }
@@ -215,7 +215,7 @@ static u8 validatePhoneNumber(const char* phoneNumber, u8* phoneNumberSize)
     return 0;
 }
 
-static void handlePhoneListOperations(LinkedList* phoneList, const char* phoneNumber, u8 isValid)
+static void handlePhoneListOperations(List* phoneList, const char* phoneNumber, u8 isValid)
 {
     if(!isValid) {
         DEBUG_LogWarning("Attempted operation with invalid phone number");
@@ -267,7 +267,7 @@ static void sendAlarmMessage(const u8* phoneNumber, const u8* message)
     UART_voidWriteData(0x1A); // Send Ctrl+Z to end message
 }
 
-static void printListToLCD(LinkedList* phoneList)
+static void printListToLCD(List* phoneList)
 {
     PrintList(phoneList, CList_address, SList_address);
 }

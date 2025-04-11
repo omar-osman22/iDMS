@@ -3,7 +3,7 @@
 
 #include "../Utilities/STD_TYPES.h"
 #include "../Utilities/BIT_MATH.h"
-#include "../Utilities/LinkedList.h"
+#include "../Service/PhoneList.h"  // Changed from LinkedList.h to PhoneList.h
 #include "../MCAL/DIO/DIO_interface.h"
 #include "../MCAL/ADC/ADC_interface.h"
 #include "../MCAL/UART/UART_Interface.h"
@@ -55,7 +55,7 @@ typedef struct {
 
 // Application State Structure
 typedef struct {
-    LinkedList* phoneList;
+    List phoneList;         // Changed from LinkedList* to List (direct struct, not pointer)
     u8 phoneNumberSize;
     u8 isValidPhoneNumber;
     u8 inputData[SMS_BUFFER_SIZE];  // Changed to array for LCD compatibility

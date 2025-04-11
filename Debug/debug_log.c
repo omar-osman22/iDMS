@@ -1,5 +1,6 @@
 #include "debug_log.h"
 #include <string.h>
+#include <avr/io.h>
 
 // Set the default log level
 volatile LogLevel_t g_CurrentLogLevel = LOG_LEVEL_INFO;
@@ -60,14 +61,20 @@ char* itoa(int num, char* str, int base) {
 void DEBUG_LogInit(LogLevel_t initialLevel) {
     g_CurrentLogLevel = initialLevel;
     
-    // Initialize UART with 9600 baud rate
+    // Use the standard UART for debug logs
+    // Make sure this doesn't conflict with the UART used by LCD
     UART_voidInit();
+    
+    // Send an initial message to confirm logger is working
+    UART_voidWriteString((u8*)"DEBUG LOGGER INITIALIZED\r\n");
 }
 
 // Send log message if level is appropriate
 void DEBUG_LogMessage(LogLevel_t level, const char* message) {
     if (level <= g_CurrentLogLevel) {
-        // Send message over UART using the correct function names
+        // Send message over UART - this will be visible during simulation
+        // Output message with a visible prefix
+        UART_voidWriteString((u8*)"[DEBUG] ");
         UART_voidWriteString((u8*)message);
         UART_voidWriteData('\r');
         UART_voidWriteData('\n');
@@ -77,7 +84,8 @@ void DEBUG_LogMessage(LogLevel_t level, const char* message) {
 // Send log message with a value
 void DEBUG_LogMessageWithValue(LogLevel_t level, const char* message, const char* value) {
     if (level <= g_CurrentLogLevel) {
-        // Send message over UART using the correct function names
+        // Send message over UART with value
+        UART_voidWriteString((u8*)"[DEBUG] ");
         UART_voidWriteString((u8*)message);
         UART_voidWriteString((u8*)": ");
         UART_voidWriteString((u8*)value);

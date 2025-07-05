@@ -10,8 +10,8 @@ PROGRAMMER = usbasp
 PORT = /dev/ttyUSB0
 
 # Directories
-INCLUDE_DIRS = -I./Application -I./Application/inc -I./Service -I./MCAL/ADC -I./MCAL/DIO -I./MCAL/UART -I./MCAL/EEPROM -I./Utilities -I./Utilities/Debug -I./Debug -I./Test
-SRC_DIRS = ./Application ./Application/src ./Service ./MCAL/ADC ./MCAL/DIO ./MCAL/UART ./MCAL/EEPROM ./Debug ./Test
+INCLUDE_DIRS = -I./Application -I./Application/inc -I./Service -I./MCAL/ADC -I./MCAL/DIO -I./MCAL/UART -I./MCAL/EEPROM -I./Utilities -I./Utilities/Debug -I./Debug -I./Test -I./Config
+SRC_DIRS = ./Application ./Application/src ./Service ./MCAL/ADC ./MCAL/DIO ./MCAL/UART ./MCAL/EEPROM ./Debug ./Test ./Config
 
 # Source files
 SRCS = $(wildcard $(addsuffix /*.c, $(SRC_DIRS)))

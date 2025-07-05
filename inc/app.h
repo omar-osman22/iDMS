@@ -100,4 +100,11 @@ u8 APP_SetTemperatureThresholds(f32 min, f32 max);
 u8 APP_SetCurrentThreshold(f32 max);
 u8 APP_SetFilterParameters(f32 alpha, f32 outlierThreshold);
 
+// Error handling and monitoring functions
+void APP_PrintErrorLog(void);
+void APP_ClearErrors(void);
+u8 APP_GetErrorCount(void);
+u8 APP_HasCriticalErrors(void);
+void APP_PrintWatchdogStatus(void);
+
 #endif /* APP_H_ */

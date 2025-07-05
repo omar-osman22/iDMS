@@ -3,6 +3,8 @@
 #include "../Debug/debug_log.h"
 #include "../Service/enhanced_sms.h"
 #include "../Service/data_logger.h"
+#include "../Service/watchdog_timer.h"
+#include "../Service/error_handler.h"
 
 // Private function prototypes
 static void initializeSystem(void);
@@ -21,8 +23,14 @@ static void checkSafetyThresholds(AppState* state); // Added missing function pr
 
 void APP_Init(void)
 {
-    // Initialize configuration system first
+    // Initialize error handling first
+    ERROR_Init();
+    
+    // Initialize configuration system 
     CONFIG_Init();
+    
+    // Initialize watchdog timer
+    WATCHDOG_Init();
     
     // Initialize enhanced SMS service
     SMS_Init();
@@ -74,6 +82,9 @@ void APP_Init(void)
 
 void APP_Start(void)
 {
+    // Kick main loop watchdog
+    WATCHDOG_KickTask(WATCHDOG_TASK_MAIN_LOOP);
+    
     // Reset phone number size for new iteration
     appState.phoneNumberSize = 0;
 
@@ -88,29 +99,64 @@ void APP_Start(void)
     appState.isValidPhoneNumber = validatePhoneNumber(appState.phoneNumber, &appState.phoneNumberSize);
 
     // Handle phone list operations
+    WATCHDOG_KickTask(WATCHDOG_TASK_PHONE_MGMT);
     handlePhoneListOperations(&appState.phoneList, appState.phoneNumber, appState.isValidPhoneNumber);
 
     // Update and check sensor readings
+    WATCHDOG_KickTask(WATCHDOG_TASK_SENSOR_READ);
     updateSensorReadings(&appState.readings);
     checkSafetyThresholds(&appState);
 
     // Update display
+    WATCHDOG_KickTask(WATCHDOG_TASK_LCD_UPDATE);
     updateDisplayReadings(&appState);
     printListToLCD(&appState.phoneList);
+    
+    // Check watchdog status periodically
+    static u8 watchdogCheckCounter = 0;
+    watchdogCheckCounter++;
+    if (watchdogCheckCounter >= 50) { // Check every 50 iterations
+        watchdogCheckCounter = 0;
+        WatchdogStatus_t status = WATCHDOG_CheckTasks();
+        if (status != WATCHDOG_OK) {
+            DEBUG_LogError("Watchdog check failed");
+        }
+    }
 }
 
 static void updateSensorReadings(SystemReadings* readings)
 {
-    // Read temperature with offset compensation
+    // Read temperature with offset compensation and error handling
     f32 tempReading = PT100_f32CalculateTemperature(TEMP_SENSOR_CHANNEL);
+    
+    // Check for invalid temperature readings
+    if (tempReading < -50.0f || tempReading > 200.0f) {
+        u8 errorData[4] = {(u8)(tempReading), 0, 0, 0};
+        ERROR_REPORT_SENSOR(ERROR_SENSOR_READ_FAILED, errorData, "Invalid temperature reading");
+        tempReading = readings->temperature.filtered; // Use last valid reading
+    }
+    
     enhancedSensorFilter(&readings->temperature, tempReading);
     
-    // Read current
+    // Read current with error handling
     f32 currentReading = CT_f32CalcIrms(CURRENT_SENSOR_CHANNEL);
+    
+    // Check for invalid current readings
+    if (currentReading < 0 || currentReading > 100.0f) {
+        u8 errorData[4] = {(u8)(currentReading), 0, 0, 0};
+        ERROR_REPORT_SENSOR(ERROR_SENSOR_READ_FAILED, errorData, "Invalid current reading");
+        currentReading = readings->current.filtered; // Use last valid reading
+    }
+    
     enhancedSensorFilter(&readings->current, currentReading);
     
-    // Calculate power
+    // Calculate power with validation
     readings->power = CT_f32CalcPower(readings->current.filtered);
+    if (readings->power < 0 || readings->power > 10000.0f) {
+        u8 errorData[4] = {(u8)(readings->power), 0, 0, 0};
+        ERROR_REPORT_SENSOR(ERROR_SENSOR_READ_FAILED, errorData, "Invalid power calculation");
+        readings->power = 0; // Set to safe value
+    }
     
     // Log readings for historical data (every 10th reading to reduce EEPROM wear)
     static u8 logCounter = 0;
@@ -165,6 +211,8 @@ static void enhancedSensorFilter(SensorReading* sensor, f32 newReading)
     // Check for outliers using statistical analysis
     if (sensor->isCalibrated && isOutlier(sensor, newReading)) {
         DEBUG_LogWarning("Outlier detected in sensor reading");
+        u8 errorData[4] = {(u8)(newReading), (u8)(sensor->mean), 0, 0};
+        ERROR_REPORT_SENSOR(ERROR_SENSOR_OUTLIER_DETECTED, errorData, "Sensor outlier detected");
         // Use previous filtered value for outliers
         newReading = sensor->filtered;
     }
@@ -259,10 +307,15 @@ static void checkSafetyThresholds(AppState* state)
         // Use enhanced SMS service for temperature alarms
         Node* current = state->phoneList.Head;
         while (current != NULL) {
-            SMS_SendTemperatureAlarm(current->value,
-                                   state->readings.temperature.filtered,
-                                   g_SystemConfig.tempThresholdMin,
-                                   g_SystemConfig.tempThresholdMax);
+            WATCHDOG_KickTask(WATCHDOG_TASK_SMS_SERVICE);
+            ES_t result = SMS_SendTemperatureAlarm(current->value,
+                                                  state->readings.temperature.filtered,
+                                                  g_SystemConfig.tempThresholdMin,
+                                                  g_SystemConfig.tempThresholdMax);
+            if (result != ES_OK) {
+                u8 errorData[4] = {0, 0, 0, 0};
+                ERROR_REPORT_COMM(ERROR_SMS_SEND_FAILED, errorData, "Temperature alarm SMS failed");
+            }
             current = current->Next;
         }
     }
@@ -274,10 +327,15 @@ static void checkSafetyThresholds(AppState* state)
         // Use enhanced SMS service for current alarms
         Node* current = state->phoneList.Head;
         while (current != NULL) {
-            SMS_SendCurrentAlarm(current->value,
-                               state->readings.current.filtered,
-                               state->readings.power,
-                               g_SystemConfig.currentThresholdMax);
+            WATCHDOG_KickTask(WATCHDOG_TASK_SMS_SERVICE);
+            ES_t result = SMS_SendCurrentAlarm(current->value,
+                                              state->readings.current.filtered,
+                                              state->readings.power,
+                                              g_SystemConfig.currentThresholdMax);
+            if (result != ES_OK) {
+                u8 errorData[4] = {0, 0, 0, 0};
+                ERROR_REPORT_COMM(ERROR_SMS_SEND_FAILED, errorData, "Current alarm SMS failed");
+            }
             current = current->Next;
         }
     }
@@ -441,4 +499,25 @@ u8 APP_SetCurrentThreshold(f32 max) {
 
 u8 APP_SetFilterParameters(f32 alpha, f32 outlierThreshold) {
     return CONFIG_SetFilterParameters(alpha, outlierThreshold);
+}
+
+// Error handling utility functions
+void APP_PrintErrorLog(void) {
+    ERROR_PrintLog();
+}
+
+void APP_ClearErrors(void) {
+    ERROR_ClearAll();
+}
+
+u8 APP_GetErrorCount(void) {
+    return ERROR_GetCount();
+}
+
+u8 APP_HasCriticalErrors(void) {
+    return ERROR_HasCriticalErrors();
+}
+
+void APP_PrintWatchdogStatus(void) {
+    WATCHDOG_PrintStatus();
 }

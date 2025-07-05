@@ -11,7 +11,7 @@ PORT = /dev/ttyUSB0
 
 # Directories
 INCLUDE_DIRS = -I./Application -I./Application/inc -I./Service -I./MCAL/ADC -I./MCAL/DIO -I./MCAL/UART -I./MCAL/EEPROM -I./Utilities -I./Utilities/Debug -I./Debug -I./Test
-SRC_DIRS = ./Application ./Application/src ./Service ./MCAL/ADC ./MCAL/DIO ./MCAL/UART ./MCAL/EEPROM ./Debug ./Test
+SRC_DIRS = ./Application ./Application/src ./Service ./MCAL/ADC ./MCAL/DIO ./MCAL/UART ./MCAL/EEPROM ./Debug
 
 # Source files
 SRCS = $(wildcard $(addsuffix /*.c, $(SRC_DIRS)))
@@ -32,7 +32,7 @@ TEST_SRCS = ./Test/test_phone_list.c ./Test/test_phone_list_stub.c ./Service/Pho
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
 # Compiler flags
-CFLAGS = -mmcu=$(MCU) $(INCLUDE_DIRS) -Os
+CFLAGS = -mmcu=$(MCU) $(INCLUDE_DIRS) -Os -DF_CPU=16000000UL
 
 # Debug flags - add when debugging
 DEBUG_FLAGS = -DDEBUG_MODE -g

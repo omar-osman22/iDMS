@@ -1,0 +1,39 @@
+# Build artifacts
+*.o
+*.elf
+*.hex
+*.map
+*.lst
+*.eep
+*.lss
+*.sym
+
+# Debug files
+*.gdb
+*.dwarf
+
+# Temporary files
+*~
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# IDE files
+.vscode/
+*.code-workspace
+
+# Dependencies
+*.d
+
+# Generated documentation
+docs/html/
+docs/latex/
+
+# Test outputs
+test_results/
+*.log
+
+# Simulation files
+*.vcd
+*.trace

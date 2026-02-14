@@ -32,7 +32,7 @@ TEST_SRCS = ./Test/test_phone_list.c ./Test/test_phone_list_stub.c ./Service/Pho
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
 # Compiler flags
-CFLAGS = -mmcu=$(MCU) $(INCLUDE_DIRS) -Os
+CFLAGS = -mmcu=$(MCU) $(INCLUDE_DIRS) -Os -DF_CPU=16000000UL
 
 # Debug flags - add when debugging
 DEBUG_FLAGS = -DDEBUG_MODE -g

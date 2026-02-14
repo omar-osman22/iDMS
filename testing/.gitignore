@@ -1,0 +1,15 @@
+# Testing artifacts and temporary files
+*.log
+*.tmp
+*_output.log
+*build*.log
+*sim*.log
+main1.hex
+main2.hex
+
+# Build artifacts that may be created during testing
+*.o
+*.elf
+*.hex
+main
+phone_list_test

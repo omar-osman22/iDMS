@@ -91,7 +91,7 @@
 - [x] T033 [US2] Count remaining compiler warnings: `make all 2>&1 | grep -c warning` — document result; target: no increase vs baseline (≤29). New/modified files MUST have zero warnings with `-Wall -Wextra`
 - [x] T034 [P] [US2] Add brief header-comment block to all modified MCAL and Service files (INTERNAL_EEPROM.h, PhoneList.c, data_logger.c, error_handler.c, TopWayLCD_Program.c, SIM_prog.c) per Constitution Principle VII
 - [x] T035 [US2] Write host-side smoke test: compile MCAL/EEPROM/INTERNAL_EEPROM.h + Config/eeprom_map.h + Config/sensor_common.h with `gcc -DTARGET_HOST -fsyntax-only` — must succeed with zero errors
-- [ ] T036 [US2] Git commit with message "fix(US2): resolve EEPROM overlap, API mismatch, static-in-header, avr header leaks, and mixed-UART bug"
+- [x] T036 [US2] Git commit with message "fix(US2): resolve EEPROM overlap, API mismatch, static-in-header, avr header leaks, and mixed-UART bug"
 
 **Checkpoint**: Firmware compiles cleanly. All known defects are resolved.
 
@@ -105,14 +105,14 @@
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Update SRC_DIRS in Makefile to: `./src ./Service ./MCAL/ADC ./MCAL/DIO ./MCAL/UART ./MCAL/EEPROM ./Config`
-- [ ] T038 [US3] Update SRCS in Makefile to explicitly include root main.c: `SRCS = main.c $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))`
-- [ ] T039 [US3] Update INCLUDE_DIRS in Makefile to include `./inc ./Config ./MCAL/Delay` and remove `./Application ./Application/inc`
-- [ ] T040 [US3] Add/verify `debug` target in Makefile with `-DDEBUG_ENABLE -g -O0` flags
-- [ ] T041 [US3] Add `test` target in Makefile that compiles with host `gcc` and `-DTARGET_HOST` flag — initially a no-op runner that returns 0 (placeholder for Unity integration)
-- [ ] T042 [US3] Add `clean` target in Makefile that removes the build/ output directory
-- [ ] T043 [US3] Verify all four targets work: `make clean && make all && make debug && make test`
-- [ ] T044 [US3] Git commit with message "feat(US3): unify build system with all/debug/test/clean targets"
+- [x] T037 [US3] Update SRC_DIRS in Makefile to: `./src ./Service ./MCAL/ADC ./MCAL/DIO ./MCAL/UART ./MCAL/EEPROM ./Config`
+- [x] T038 [US3] Update SRCS in Makefile to explicitly include root main.c: `SRCS = main.c $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))`
+- [x] T039 [US3] Update INCLUDE_DIRS in Makefile to include `./inc ./Config ./MCAL/Delay` and remove `./Application ./Application/inc`
+- [x] T040 [US3] Add/verify `debug` target in Makefile with `-DDEBUG_ENABLE -g -O0` flags
+- [x] T041 [US3] Add `test` target in Makefile that compiles with host `gcc` and `-DTARGET_HOST` flag — initially a no-op runner that returns 0 (placeholder for Unity integration)
+- [x] T042 [US3] Add `clean` target in Makefile that removes the build/ output directory
+- [x] T043 [US3] Verify all four targets work: `make clean && make all && make debug && make test`
+- [x] T044 [US3] Git commit with message "feat(US3): unify build system with all/debug/test/clean targets"
 
 **Checkpoint**: Build system is unified and fully functional.
 
@@ -128,18 +128,18 @@
 
 ### Implementation for User Story 7
 
-- [ ] T045 [US7] Update MCAL/DIO/DIO_config.h with corrected pin directions for all 7 ports (A–G) per contracts/dio_config_corrected.h — fix Port A all to DIO_INPUT (ADC), Port B PB0/PB3 to DIO_INPUT (ISP), Port C PC0/PC2/PC3 to DIO_OUTPUT (GSM reset, relays), Port D PD1 to DIO_OUTPUT (UART0 TX), and add new Port E/F/G sections with inline comments
-- [ ] T046 [US7] Uncomment and verify MDIO_vInt() initialization function in MCAL/DIO/DIO_program.c — ensure it applies DIO_config.h direction macros to DDR registers for all 7 ports (A–G); currently commented out so pin directions are never set at runtime
-- [ ] T047 [P] [US7] Correct UART peripheral labels in Hardware/Hardware_Integration.md — change all UART0→LCD references to UART0→GSM(SIM800L) and UART1→GSM references to UART1→LCD(TopWay) to match actual firmware register usage per research.md §9
-- [ ] T048 [P] [US7] Correct UART peripheral labels in Hardware/PCB_Schematic.md — update net labels to UART0(PD0/PD1)→GSM and UART1(PE0/PE1)→LCD per actual code
-- [ ] T049 [US7] Create Hardware/Wiring_Reference.md with consolidated pin-map table — for every active ATmega128 pin across ports A–G, list: port/pin, function, direction (I/O), SW config macro (DIO_PIN_Xn_DIR / ADC channel / UART register), and HW connector reference (J1–J8) per data-model.md §6 and §8
-- [ ] T050 [US7] Add connector pinout section to Hardware/Wiring_Reference.md — J1 through J8 pinouts per data-model.md §8 with pin assignments, signal names, and connected modules (J1=power, J2=PT100, J3=CT, J4=LCD/UART1, J5=GSM/UART0, J6=antenna, J7=SIM, J8=ISP)
-- [ ] T051 [US7] Add ISP programming section to Hardware/Wiring_Reference.md — J8 2×3 header pinout (MISO/PB3, VCC, SCK/PB1, MOSI/PB2, RST, GND), USBasp connection procedure, and avrdude flash command (`avrdude -c usbasp -p m128 -U flash:w:build/main.hex:i`)
-- [ ] T052 [US7] Add power rail verification section to Hardware/Wiring_Reference.md — 5 rails (+12V input 10–15V, +5V digital 4.75–5.25V, +3.3V logic 3.2–3.4V, +5V analog 4.90–5.10V, +3.7V GSM 3.6–3.8V) with regulator ID, measurement point, and no-go action per research.md §10
-- [ ] T053 [US7] Add power-on verification sequence to Hardware/Wiring_Reference.md — 7-step go/no-go procedure: (1) visual inspect for shorts, (2) apply 12V and verify J1, (3) measure +5V digital, (4) measure +3.3V logic, (5) measure +5V analog, (6) measure +3.7V GSM, (7) check idle current <200 mA — connect modules only after all rails pass
-- [ ] T054 [US7] Verify `make all` compiles after DIO_config.h and DIO_program.c changes — zero new errors introduced
-- [ ] T055 [P] [US7] Add header-comment block to MCAL/DIO/DIO_config.h documenting cross-reference source (contracts/dio_config_corrected.h, Hardware_Integration.md), UART peripheral assignment note (UART0→GSM, UART1→LCD), and change history
-- [ ] T056 [US7] Git commit with message "feat(US7): fix DIO pin config for all ports, correct UART labels, add wiring reference card"
+- [x] T045 [US7] Update MCAL/DIO/DIO_config.h with corrected pin directions for all 7 ports (A–G) per contracts/dio_config_corrected.h — fix Port A all to DIO_INPUT (ADC), Port B PB0/PB3 to DIO_INPUT (ISP), Port C PC0/PC2/PC3 to DIO_OUTPUT (GSM reset, relays), Port D PD1 to DIO_OUTPUT (UART0 TX), and add new Port E/F/G sections with inline comments
+- [x] T046 [US7] Uncomment and verify MDIO_vInt() initialization function in MCAL/DIO/DIO_program.c — ensure it applies DIO_config.h direction macros to DDR registers for all 7 ports (A–G); currently commented out so pin directions are never set at runtime
+- [x] T047 [P] [US7] Correct UART peripheral labels in Hardware/Hardware_Integration.md — change all UART0→LCD references to UART0→GSM(SIM800L) and UART1→GSM references to UART1→LCD(TopWay) to match actual firmware register usage per research.md §9
+- [x] T048 [P] [US7] Correct UART peripheral labels in Hardware/PCB_Schematic.md — update net labels to UART0(PD0/PD1)→GSM and UART1(PE0/PE1)→LCD per actual code
+- [x] T049 [US7] Create Hardware/Wiring_Reference.md with consolidated pin-map table — for every active ATmega128 pin across ports A–G, list: port/pin, function, direction (I/O), SW config macro (DIO_PIN_Xn_DIR / ADC channel / UART register), and HW connector reference (J1–J8) per data-model.md §6 and §8
+- [x] T050 [US7] Add connector pinout section to Hardware/Wiring_Reference.md — J1 through J8 pinouts per data-model.md §8 with pin assignments, signal names, and connected modules (J1=power, J2=PT100, J3=CT, J4=LCD/UART1, J5=GSM/UART0, J6=antenna, J7=SIM, J8=ISP)
+- [x] T051 [US7] Add ISP programming section to Hardware/Wiring_Reference.md — J8 2×3 header pinout (MISO/PB3, VCC, SCK/PB1, MOSI/PB2, RST, GND), USBasp connection procedure, and avrdude flash command (`avrdude -c usbasp -p m128 -U flash:w:build/main.hex:i`)
+- [x] T052 [US7] Add power rail verification section to Hardware/Wiring_Reference.md — 5 rails (+12V input 10–15V, +5V digital 4.75–5.25V, +3.3V logic 3.2–3.4V, +5V analog 4.90–5.10V, +3.7V GSM 3.6–3.8V) with regulator ID, measurement point, and no-go action per research.md §10
+- [x] T053 [US7] Add power-on verification sequence to Hardware/Wiring_Reference.md — 7-step go/no-go procedure: (1) visual inspect for shorts, (2) apply 12V and verify J1, (3) measure +5V digital, (4) measure +3.3V logic, (5) measure +5V analog, (6) measure +3.7V GSM, (7) check idle current <200 mA — connect modules only after all rails pass
+- [x] T054 [US7] Verify `make all` compiles after DIO_config.h and DIO_program.c changes — zero new errors introduced
+- [x] T055 [P] [US7] Add header-comment block to MCAL/DIO/DIO_config.h documenting cross-reference source (contracts/dio_config_corrected.h, Hardware_Integration.md), UART peripheral assignment note (UART0→GSM, UART1→LCD), and change history
+- [x] T056 [US7] Git commit with message "feat(US7): fix DIO pin config for all ports, correct UART labels, add wiring reference card"
 
 **Checkpoint**: DIO pin configuration matches hardware design. Wiring reference card enables first-attempt bench setup with power rail verification.
 

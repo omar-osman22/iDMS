@@ -1,276 +1,248 @@
-# Industrial Monitoring System (iDMS) - Enhanced Version
+# Industrial Data Monitoring System (iDMS)
 
-## Overview
+Firmware for an ATmega128-based industrial monitoring unit that measures temperature (PT100 RTD) and current (CT sensor), displays readings on a TopWay LCD, and sends SMS alerts via a SIM800L GSM module.
 
-The Industrial Monitoring System (iDMS) is an embedded system designed for real-time monitoring of industrial equipment using temperature and current sensors. This enhanced version includes significant improvements in reliability, configurability, and functionality.
+---
 
-## Key Features
+## Table of Contents
 
-### Original Functionality
-- Real-time temperature monitoring using PT100 sensors
-- Current monitoring with CT sensors  
-- Power calculation and display
-- SMS alarm notifications via SIM module
-- Phone number management with EEPROM storage
-- LCD display interface
-- Debug logging system
+1. [Features](#features)
+2. [Hardware Overview](#hardware-overview)
+3. [Repository Structure](#repository-structure)
+4. [Build Instructions](#build-instructions)
+5. [EEPROM Memory Map](#eeprom-memory-map)
+6. [API Reference](#api-reference)
+7. [Error Codes](#error-codes)
+8. [Testing](#testing)
+9. [MCU Migration](#mcu-migration)
 
-### Enhanced Features
+---
 
-#### 1. Advanced Sensor Filtering
-- **IIR (Infinite Impulse Response) Filter**: Replaced simple moving average with configurable IIR filter for better noise reduction
-- **Outlier Detection**: Statistical analysis to detect and filter sensor reading outliers
-- **Automatic Calibration**: Self-calibration during system startup
-- **Configurable Parameters**: Filter coefficients and outlier thresholds can be adjusted
+## Features
 
-#### 2. Configuration Management System
-- **EEPROM Persistence**: All configuration stored in EEPROM with integrity checking
-- **Runtime Configurability**: Thresholds and parameters can be changed without firmware updates
-- **Default Fallback**: Automatic loading of safe defaults if configuration is corrupted
-- **Checksum Verification**: Data integrity protection
+- Real-time PT100 temperature monitoring (10-bit ADC, IIR-filtered)
+- CT current monitoring with RMS calculation and derived power
+- SMS alarm notifications via SIM800L GSM module (UART0)
+- TopWay HMI LCD display (UART1)
+- Phone number list management (stored in EEPROM)
+- Data logger with circular buffer (EEPROM-backed)
+- Error handler with persistent error log
+- Software watchdog monitoring critical tasks
+- System configuration persistence (EEPROM)
+- Clean MCAL abstraction layer (migration-ready)
 
-#### 3. Enhanced SMS Service
-- **Retry Mechanism**: Configurable retry attempts for failed SMS transmissions
-- **Better Formatting**: Detailed alarm messages with timestamps and context
-- **Phone Number Validation**: Comprehensive validation before sending
-- **Multiple Message Types**: Different formats for alarms, status reports, etc.
+---
 
-#### 4. Data Logging System
-- **Historical Storage**: Circular buffer storing sensor readings with timestamps
-- **Statistical Analysis**: Automatic calculation of min/max/average values
-- **EEPROM Persistence**: Log data survives power cycles
-- **Trend Analysis**: Support for identifying patterns and trends
+## Hardware Overview
 
-#### 5. Watchdog Timer System
-- **Software Watchdog**: Monitors critical system tasks for failures
-- **Task-Specific Timeouts**: Different timeout periods for different functions
-- **Automatic Recovery**: Attempts to recover from detected failures
-- **System Health Monitoring**: Continuous monitoring of system responsiveness
+| Component | Part | MCU Interface |
+|-----------|------|---------------|
+| MCU | ATmega128 @ 16 MHz | — |
+| Temperature sensor | PT100 RTD + conditioning | PA0 (ADC ch0) |
+| Current sensor | CT + burden resistor | PA1 (ADC ch1) |
+| LCD display | TopWay HMI | **UART1** (PE0/PE1), J4 |
+| GSM module | SIM800L | **UART0** (PD0/PD1), J5 |
+| ISP programmer | USBasp | J8 (2×3 SPI header) |
 
-#### 6. Error Handling System
-- **Centralized Error Management**: All errors logged and categorized
-- **Severity Levels**: Different handling for info, warning, error, and critical events
-- **Automatic Recovery**: Attempts to recover from known error conditions
-- **Error Persistence**: Error log stored in EEPROM for post-analysis
+> **UART note**: UART0 (PD0/PD1) → GSM; UART1 (PE0/PE1) → LCD.
+> See [Hardware/Wiring_Reference.md](Hardware/Wiring_Reference.md) for the full pin map, connector pinouts, power-rail go/no-go procedure, and ISP instructions.
 
-## System Architecture
+---
+
+## Repository Structure
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Sensor Layer  │    │  Application    │    │  Communication  │
-│                 │    │     Layer       │    │     Layer       │
-│ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
-│ │ PT100 Temp  │ │    │ │ Enhanced    │ │    │ │ Enhanced    │ │
-│ │ Sensor      │ │◄───┤ │ Filtering   │ │    │ │ SMS Service │ │
-│ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
-│ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
-│ │ CT Current  │ │    │ │ Data Logger │ │    │ │ LCD Display │ │
-│ │ Sensor      │ │◄───┤ │             │ │    │ │             │ │
-│ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-┌─────────────────────────────────┼─────────────────────────────────┐
-│              System Services Layer                                │
-│ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │
-│ │ Config      │ │ Error       │ │ Watchdog    │ │ Debug       │ │
-│ │ Management  │ │ Handler     │ │ Timer       │ │ Logger      │ │
-│ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+iDMS/
+├── main.c                      # Application entry point
+├── Makefile                    # Unified build system (all/debug/test/clean)
+├── inc/
+│   └── app.h                   # Application-wide types and extern declarations
+├── src/
+│   └── app.c                   # App logic (filtering, alarms, phone mgmt)
+├── MCAL/                       # Microcontroller Abstraction Layer
+│   ├── ADC/                    # ADC driver (ATmega128)
+│   ├── Delay/                  # Portable delay shim (MCAL_DelayMs/MCAL_DelayUs)
+│   ├── DIO/                    # Digital I/O driver + pin direction config
+│   ├── EEPROM/                 # Unified EEPROM API
+│   └── UART/                   # UART driver (UART0 + UART1)
+├── Service/                    # Hardware-independent service layer
+│   ├── CTcurrent_*.c/h         # Current sensor service
+│   ├── PT100_*.c/h             # Temperature sensor service
+│   ├── SIM_prog.c/h            # SIM800L GSM AT-command driver
+│   ├── TopWayLCD_*.c/h         # TopWay LCD driver
+│   ├── PhoneList.c/h           # Phone list management (EEPROM-backed)
+│   ├── data_logger.c/h         # Data logging service
+│   ├── error_handler.c/h       # Centralised error handling
+│   ├── enhanced_sms.c/h        # SMS retry/formatting service
+│   ├── watchdog_timer.c/h      # Software watchdog
+│   └── debug_log.c/h           # Debug logging (disabled in release)
+├── Config/
+│   ├── eeprom_map.h            # EEPROM region macros + overlap guards
+│   ├── sensor_common.h         # Shared VREF, ADC_RESOLUTION constants
+│   └── system_config.c/h       # System configuration persistence
+├── Utilities/
+│   ├── STD_TYPES.h             # Portable type aliases (u8, u16, f32, ...)
+│   ├── BIT_MATH.h              # Bit manipulation macros
+│   └── errorStates.h           # Return code enum (ES_OK, ES_NOK, ...)
+├── Hardware/
+│   ├── Wiring_Reference.md     # Pin map, connectors, ISP, power rails
+│   ├── Hardware_Integration.md
+│   ├── PCB_Schematic.md
+│   ├── BOM.md
+│   └── Safety_Guidelines.md
+├── docs/
+│   └── MCU_Migration_Report.md # STM32F411 vs ESP32-S3 comparison
+├── Test/
+│   └── test_phone_list_stub.c  # Host-side placeholder test
+└── specs/                      # Feature specification documents
 ```
 
-## Configuration Parameters
-
-The system supports the following configurable parameters:
-
-### Sensor Configuration
-- **Temperature Thresholds**: Min/max safe temperature limits
-- **Current Threshold**: Maximum safe current limit
-- **Filter Alpha**: IIR filter coefficient (0 < α < 1)
-- **Outlier Threshold**: Standard deviations for outlier detection
-- **Calibration Samples**: Number of samples for initial calibration
-
-### Alarm Configuration
-- **Alarm Delay**: Minimum time between alarm messages
-- **Retry Count**: Number of SMS retry attempts
-- **Retry Delay**: Delay between retry attempts
-
-### System Configuration
-- **Debug Level**: Logging verbosity level
-- **Display Update Interval**: LCD refresh rate
-- **Watchdog Timeouts**: Individual task timeout periods
-
-## API Reference
-
-### Core Application Functions
-```c
-void APP_Init(void);                    // Initialize system
-void APP_Start(void);                   // Main application loop
-f32 APP_GetFilteredTemperature(void);   // Get current temperature
-f32 APP_GetFilteredCurrent(void);       // Get current value
-f32 APP_GetCalculatedPower(void);       // Get calculated power
-u8 APP_IsSystemInAlarm(void);           // Check alarm status
-```
-
-### Configuration Functions
-```c
-u8 APP_SetTemperatureThresholds(f32 min, f32 max);
-u8 APP_SetCurrentThreshold(f32 max);
-u8 APP_SetFilterParameters(f32 alpha, f32 outlierThreshold);
-```
-
-### Data Logging Functions
-```c
-void APP_PrintDataLog(void);
-void APP_ClearDataLog(void);
-void APP_GetSensorStatistics(f32* avgTemp, f32* maxTemp, f32* minTemp, 
-                            f32* avgCurrent, f32* maxCurrent, f32* minCurrent);
-```
-
-### Error Handling Functions
-```c
-void APP_PrintErrorLog(void);
-void APP_ClearErrors(void);
-u8 APP_GetErrorCount(void);
-u8 APP_HasCriticalErrors(void);
-```
-
-### Enhanced SMS Functions
-```c
-ES_t SMS_SendTemperatureAlarm(const u8* phoneNumber, f32 temperature, f32 minThreshold, f32 maxThreshold);
-ES_t SMS_SendCurrentAlarm(const u8* phoneNumber, f32 current, f32 power, f32 maxThreshold);
-ES_t SMS_SendSystemStatus(const u8* phoneNumber, f32 temperature, f32 current, f32 power);
-```
+---
 
 ## Build Instructions
 
 ### Prerequisites
-- AVR-GCC compiler toolchain
-- AVR-OBJCOPY for hex file generation
-- Make utility
-- AVRDUDE for programming (optional)
 
-### Build Commands
 ```bash
-# Clean build
-make clean
+# Install AVR toolchain (Ubuntu/Debian)
+sudo apt install gcc-avr avr-libc binutils-avr avrdude
 
-# Debug build with logging
-make debug
-
-# Release build
-make all
-
-# Build and upload to MCU
-make upload
-
-# Build test program
-make test
-
-# Run simulation
-make simulate
+# Verify
+avr-gcc --version
 ```
 
-### Build Targets
-- `main.hex` - Main application firmware
-- `phone_list_test.hex` - Phone list test program
-- `test_enhancements` - Enhancement test suite
+### Targets
 
-## Testing
+| Target | Command | Description |
+|--------|---------|-------------|
+| Release firmware | `make all` | Produces `build/main.hex` with `-Os` |
+| Debug firmware | `make debug` | Adds `-DDEBUG_ENABLE -g -O0` |
+| Host tests | `make test` | Compiles host-side stubs with `gcc -DTARGET_HOST` |
+| Clean | `make clean` | Removes the `build/` directory |
+| Upload | `make upload` | Flashes `build/main.hex` via USBasp |
 
-The system includes comprehensive test programs:
+### Quick Start
 
-### 1. Phone List Test (`make test`)
-- Tests phone number validation
-- Tests phone list operations
-- Interactive terminal interface
+```bash
+git clone <repo-url> && cd iDMS
 
-### 2. Enhancement Test Suite
-- Configuration system testing
-- Data logging validation
-- Error handling verification
-- Watchdog timer testing
-- Enhanced filtering validation
+make clean && make all
 
-## Memory Usage
-
-### EEPROM Layout
-```
-0x000 - 0x1FF: Phone list storage
-0x200 - 0x2FF: System configuration
-0x300 - 0x3FF: Data log storage
-0x400 - 0x4FF: Error log storage
+# Flash via USBasp connected to J8
+avrdude -c usbasp -p m128 -U flash:w:build/main.hex:i
 ```
 
-### Flash Memory
-- Application code: ~15KB
-- Enhanced features: ~8KB additional
-- Total: ~23KB (18% of ATmega128)
+See [Hardware/Wiring_Reference.md §3](Hardware/Wiring_Reference.md#3-isp-programming-procedure) for the full ISP procedure and fuse bit settings.
 
-### RAM Usage
-- Static buffers: ~2KB
-- Stack: ~512 bytes
-- Total: ~2.5KB (61% of ATmega128)
+---
+
+## EEPROM Memory Map
+
+Defined in [Config/eeprom_map.h](Config/eeprom_map.h).  
+`_Static_assert` guards prevent region overlaps at compile time.
+
+| Region | Base | Size | Content |
+|--------|------|------|---------|
+| Phone list | `0x000` | 512 B | Up to 20 phone numbers (11 digits + null) |
+| System config | `0x200` | 128 B | Thresholds, filter coefficients, version |
+| Data log | `0x280` | 1024 B | Circular sensor-reading log (timestamped) |
+| Error log | `0x680` | 384 B | Error records with code, timestamp, description |
+| Reserved | `0x800` | to end | Future use |
+
+ATmega128 EEPROM total: 4096 B (0x000–0xFFF).
+
+---
+
+## API Reference
+
+### Core Application (`src/app.c`)
+
+```c
+void APP_Init(void);                    // Initialise all subsystems
+void APP_Start(void);                   // Main loop (does not return)
+f32  APP_GetFilteredTemperature(void);  // IIR-filtered temperature (°C)
+f32  APP_GetFilteredCurrent(void);      // IIR-filtered current (A)
+f32  APP_GetCalculatedPower(void);      // Derived power = V × I (W)
+u8   APP_IsSystemInAlarm(void);         // 1 if any threshold exceeded
+```
+
+### Configuration (`Config/system_config.c`)
+
+```c
+u8   CONFIG_Init(void);         // Load config from EEPROM
+u8   CONFIG_Save(void);         // Persist config to EEPROM
+void CONFIG_LoadDefaults(void); // Reset to safe defaults
+void CONFIG_PrintCurrent(void); // Print current config (debug)
+```
+
+### Data Logger (`Service/data_logger.c`)
+
+```c
+void DATALOG_Init(void);
+void DATALOG_LogReading(f32 temp, f32 current, f32 power);
+void DATALOG_Print(void);
+void DATALOG_Clear(void);
+```
+
+### Error Handler (`Service/error_handler.c`)
+
+```c
+void ERROR_Init(void);
+void ERROR_Report(u16 code, const char* description);
+void ERROR_PrintLog(void);
+void ERROR_ClearLog(void);
+u8   ERROR_HasCritical(void);
+```
+
+### EEPROM (`MCAL/EEPROM/INTERNAL_EEPROM.c`)
+
+```c
+void EEPROM_INIT(void);
+void EEPROM_WriteByte(u16 address, u8 data);
+u8   EEPROM_ReadByte(u16 address);
+void EEPROM_WriteBlock(u16 address, const u8* buf, u16 len);
+void EEPROM_ReadBlock(u16 address, u8* buf, u16 len);
+```
+
+---
 
 ## Error Codes
 
-### Sensor Errors (0x1000-0x1FFF)
-- `0x1001`: Sensor read failed
-- `0x1002`: Sensor calibration failed
-- `0x1003`: Sensor outlier detected
-
-### Communication Errors (0x2000-0x2FFF)
-- `0x2001`: SMS send failed
-- `0x2002`: Network unavailable
-- `0x2003`: Invalid phone number
-
-### Memory Errors (0x3000-0x3FFF)
-- `0x3001`: EEPROM read failed
-- `0x3002`: EEPROM write failed
-- `0x3003`: EEPROM checksum error
-
-### System Errors (0x5000-0x5FFF)
-- `0x5001`: Watchdog timeout
-- `0x5002`: System overload
-
-## Performance Improvements
-
-1. **Filtering**: 40% reduction in noise with IIR filter
-2. **Reliability**: 90% reduction in false alarms with outlier detection
-3. **Response Time**: 30% faster alarm notifications with retry mechanism
-4. **Data Integrity**: 99.9% configuration preservation with checksums
-5. **System Uptime**: 95% improvement with watchdog monitoring
-
-## Future Enhancements
-
-1. **Wireless Communication**: Add WiFi/Bluetooth support
-2. **Remote Configuration**: Web-based configuration interface
-3. **Advanced Analytics**: Machine learning for predictive maintenance
-4. **Multiple Sensors**: Support for additional sensor types
-5. **Cloud Integration**: Data upload to cloud platforms
-6. **Mobile App**: Dedicated mobile application for monitoring
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with appropriate tests
-4. Ensure all tests pass
-5. Submit a pull request
-
-## Support
-
-For technical support or questions:
-- Create an issue in the GitHub repository
-- Check the documentation in the `docs/` directory
-- Review the test programs for usage examples
+| Range | Category | Examples |
+|-------|----------|---------|
+| `0x1000–0x1FFF` | Sensor | `0x1001` read fail, `0x1002` calibration fail, `0x1003` outlier |
+| `0x2000–0x2FFF` | Communication | `0x2001` SMS fail, `0x2002` no network |
+| `0x3000–0x3FFF` | Memory | `0x3001` EEPROM read fail, `0x3003` checksum error |
+| `0x5000–0x5FFF` | System | `0x5001` watchdog timeout, `0x5002` overload |
 
 ---
-**Version**: 2.0.0  
-**Last Updated**: 2024  
-**Hardware**: ATmega128 microcontroller
+
+## Testing
+
+### Host-Side Header Smoke Test
+
+```bash
+gcc -DTARGET_HOST -fsyntax-only MCAL/EEPROM/INTERNAL_EEPROM.h Config/eeprom_map.h Config/sensor_common.h
+```
+
+### Placeholder Test Runner
+
+```bash
+make test
+# Compiles Test/test_phone_list_stub.c with gcc -DTARGET_HOST
+# Full Unity integration planned in a follow-up feature branch
+```
+
+---
+
+## MCU Migration
+
+See [docs/MCU_Migration_Report.md](docs/MCU_Migration_Report.md) for a full comparison of ATmega128, STM32F411CEU6, and ESP32-S3.
+
+**TL;DR**: **STM32F411CEU6 (BlackPill)** is the recommended next platform — 32× SRAM, 12-bit ADC with DMA, SWD debugging. Migration deferred until this cleanup is complete; the clean MCAL layer makes porting straightforward (~2–3 weeks).
+
+---
+
+**Version**: 2.1.0 (post-foundation-overhaul)  
+**MCU**: ATmega128 @ 16 MHz  
+**Last Updated**: 2026-02-21

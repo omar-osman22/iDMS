@@ -16,8 +16,8 @@ This guide provides step-by-step instructions for integrating hardware component
       │    │    │    │         │                    │
       │    │    │    │         ├─ PA0 ← [PT100 RTD] │
       │    │    │    │         ├─ PA1 ← [CT Sensor] │
-      │    │    │    │         ├─ PD0/PD1 ↔ [LCD]   │
-      │    │    │    │         └─ PE0/PE1 ↔ [GSM]   │
+      │    │    │    │         ├─ PD0/PD1 ↔ [GSM]   │
+      │    │    │    │         └─ PE0/PE1 ↔ [LCD]   │
       │    │    │    │                               │
       └────┼────┼────┼─── [LCD Display]              │
            │    │    │                               │
@@ -70,8 +70,8 @@ PC7         → Emergency stop input (active low)
 
 #### Port D (UART0 and External Interrupts)
 ```
-PD0 (RXD0)  → UART0 RX (LCD communication)
-PD1 (TXD0)  → UART0 TX (LCD communication)
+PD0 (RXD0)  → UART0 RX (GSM/SIM800L communication)
+PD1 (TXD0)  → UART0 TX (GSM/SIM800L communication)
 PD2 (INT0)  → External interrupt 0 (emergency stop)
 PD3 (INT1)  → External interrupt 1 (user input)
 PD4 (ICP1)  → Input capture (frequency measurement)
@@ -82,8 +82,8 @@ PD7 (T2)    → Reserved
 
 #### Port E (UART1 and Control)
 ```
-PE0 (RXD1)  → UART1 RX (GSM communication)
-PE1 (TXD1)  → UART1 TX (GSM communication)  
+PE0 (RXD1)  → UART1 RX (LCD/TopWay communication)
+PE1 (TXD1)  → UART1 TX (LCD/TopWay communication)
 PE2 (XCK1)  → External clock for UART1
 PE3         → SD card chip select (future expansion)
 PE4         → SPI chip select 1

@@ -43,8 +43,8 @@
 │          ├─ RESET                │VCC      GND    PA6  ├─→ (Reserved)     │
 │         ┌┴┐                       │                PA7  ├─→ (Reserved)     │
 │         │ │ SW1                   │                     │                  │
-│         └┬┘                       │PB0             PD0  ├─→ UART0_RX (LCD) │
-│          └─ GND                   │PB1 (SCK)       PD1  ├─→ UART0_TX (LCD) │
+│         └┬┘                       │PB0             PD0  ├─→ UART0_RX (GSM) │
+│          └─ GND                   │PB1 (SCK)       PD1  ├─→ UART0_TX (GSM) │
 │                                   │PB2 (MOSI)      PD2  ├─→ INT0 (EmrgStop)│
 │                                   │PB3 (MISO)      PD3  ├─→ INT1 (User)    │
 │                                   │PB4             PD4  ├─→ (Reserved)     │
@@ -52,8 +52,8 @@
 │                                   │PB6             PD6  ├─→ (Reserved)     │
 │                                   │PB7             PD7  ├─→ (Reserved)     │
 │                                   │                     │                  │
-│                                   │PC0             PE0  ├─→ UART1_RX (GSM) │
-│                                   │PC1             PE1  ├─→ UART1_TX (GSM) │
+│                                   │PC0             PE0  ├─→ UART1_RX (LCD) │
+│                                   │PC1             PE1  ├─→ UART1_TX (LCD) │
 │                                   │PC2             PE2  ├─→ (Reserved)     │
 │                                   │PC3             PE3  ├─→ SD_CS          │
 │                                   │PC4             PE4  ├─→ SPI_CS1        │
@@ -139,14 +139,14 @@
 │  ┌─────────────┐                        ┌─────────────────────────────────┐│
 │  │1-+5V        │ ←── +5V Rail           │1-+3.7V      ←── +3.7V Rail     ││
 │  │2-GND        │ ←── GND                │2-GND        ←── GND             ││
-│  │3-TX_LCD     │ ←── PD1 (UART0_TX)     │3-TX_GSM     ←── PE1 (UART1_TX) ││
-│  │4-RX_LCD     │ ──→ PD0 (UART0_RX)     │4-RX_GSM     ──→ PE0 (UART1_RX) ││
+│  │3-TX_LCD     │ ←── PE1 (UART1_TX)     │3-TX_GSM     ←── PD1 (UART0_TX) ││
+│  │4-RX_LCD     │ ──→ PE0 (UART1_RX)     │4-RX_GSM     ──→ PD0 (UART0_RX) ││
 │  └─────────────┘                        │5-RESET      ←── PC0 (Control)  ││
 │                                         │6-STATUS     ──→ PC1 (Monitor)  ││
-│  UART0 Configuration:                   └─────────────────────────────────┘│
+│  UART1 Configuration:                   └─────────────────────────────────┘│
 │  - Baud: 9600 bps                                                        │
 │  - 8N1 (8 data, no parity, 1 stop)                                      │
-│  - TopWay HMI Protocol                   UART1 Configuration:             │
+│  - TopWay HMI Protocol                   UART0 Configuration:             │
 │                                         - Baud: 9600 bps                 │
 │                                         - 8N1 (8 data, no parity, 1 stop)│
 │                                         - AT Command Protocol             │
@@ -242,8 +242,8 @@
 │  ┌─────────────────────────────────────┐ │ ┌─────────────────────────────┐ ││
 │  │ TP7: Temperature ADC Input          │ │ │1-+5V     3-TX (Debug out)   │ ││
 │  │ TP8: Current ADC Input              │ │ │2-GND     4-RX (Debug in)    │ ││
-│  │ TP9: UART0 TX (LCD)                 │ │ └─────────────────────────────┘ ││
-│  │ TP10: UART1 TX (GSM)                │ │                                 ││
+│  │ TP9: UART0 TX (GSM)                 │ │ └─────────────────────────────┘ ││
+│  │ TP10: UART1 TX (LCD)                │ │                                 ││
 │  │ TP11: Crystal Oscillator            │ │ Debug Features:                 ││
 │  │ TP12: Reset Signal                  │ │ - Real-time data monitoring     ││
 │  └─────────────────────────────────────┘ │ - Configuration interface       ││

@@ -153,9 +153,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T057 [US4] Verify specs/001-foundation-overhaul/research.md Section 6 (MCU Migration Comparison) is complete with comparison matrix, feature mapping, effort estimates, and recommendation
-- [ ] T058 [US4] Create docs/MCU_Migration_Report.md at the repository root docs/ directory — extract and format the MCU comparison from research.md into a standalone, reviewer-friendly document with: executive summary, comparison table, feature mapping, migration effort breakdown, and recommendation (STM32F411CEU6 primary, ESP32-S3 secondary)
-- [ ] T059 [US4] Git commit with message "docs(US4): add MCU migration research report"
+- [x] T057 [US4] Verify specs/001-foundation-overhaul/research.md Section 6 (MCU Migration Comparison) is complete with comparison matrix, feature mapping, effort estimates, and recommendation
+- [x] T058 [US4] Create docs/MCU_Migration_Report.md at the repository root docs/ directory — extract and format the MCU comparison from research.md into a standalone, reviewer-friendly document with: executive summary, comparison table, feature mapping, migration effort breakdown, and recommendation (STM32F411CEU6 primary, ESP32-S3 secondary)
+- [x] T059 [US4] Git commit with message "docs(US4): add MCU migration research report"
 
 **Checkpoint**: Migration decision document is ready for review.
 
@@ -169,13 +169,13 @@
 
 ### Implementation for User Story 5
 
-- [ ] T060 [US5] Rewrite README.md: update project name (remove any "CodeCrafters" references), update feature list, update directory structure to match post-cleanup layout
-- [ ] T061 [US5] Update README.md build instructions section to match the unified Makefile targets (make all, make debug, make test, make clean, make upload)
-- [ ] T062 [US5] Update README.md EEPROM memory map section to match Config/eeprom_map.h (PhoneList 0x000, Config 0x200, DataLog 0x280, ErrorLog 0x680, Reserved 0x800)
-- [ ] T063 [US5] Update README.md API reference section — audit every listed function against actual codebase; remove functions that don't exist; add missing public functions
-- [ ] T064 [P] [US5] Verify pin assignments in Hardware/*.md files are consistent with MCAL DIO_config.h, ADC_register.h, and UART_Registers.h — document any remaining discrepancies (US7 should have resolved the known ones)
-- [ ] T065 [US5] Remove all "CodeCrafters" references from documentation and build config: `grep -rn "CodeCrafters" . --include='*.md' --include='*.mk' --include='Makefile'` must return empty
-- [ ] T066 [US5] Git commit with message "docs(US5): update all project documentation to reflect post-cleanup state"
+- [x] T060 [US5] Rewrite README.md: update project name (remove any "CodeCrafters" references), update feature list, update directory structure to match post-cleanup layout
+- [x] T061 [US5] Update README.md build instructions section to match the unified Makefile targets (make all, make debug, make test, make clean, make upload)
+- [x] T062 [US5] Update README.md EEPROM memory map section to match Config/eeprom_map.h (PhoneList 0x000, Config 0x200, DataLog 0x280, ErrorLog 0x680, Reserved 0x800)
+- [x] T063 [US5] Update README.md API reference section — audit every listed function against actual codebase; remove functions that don't exist; add missing public functions
+- [x] T064 [P] [US5] Verify pin assignments in Hardware/*.md files are consistent with MCAL DIO_config.h, ADC_register.h, and UART_Registers.h — document any remaining discrepancies (US7 should have resolved the known ones)
+- [x] T065 [US5] Remove all "CodeCrafters" references from documentation and build config: `grep -rn "CodeCrafters" . --include='*.md' --include='*.mk' --include='Makefile'` must return empty
+- [x] T066 [US5] Git commit with message "docs(US5): update all project documentation to reflect post-cleanup state"
 
 **Checkpoint**: Documentation is accurate and self-consistent.
 
@@ -189,9 +189,9 @@
 
 ### Implementation for User Story 6
 
-- [ ] T067 [US6] Create docs/ENHANCEMENT_BACKLOG.md with categorized enhancement ideas (Reliability, Connectivity, UI, Maintainability, Testing) — at least 2 ideas per category, each with: title, description, platform dependency (ATmega128 / New MCU / Platform-independent), complexity (Low/Medium/High), suggested priority
-- [ ] T068 [US6] Add cross-references from enhancement backlog to relevant research.md sections and MCU migration report where applicable
-- [ ] T069 [US6] Git commit with message "docs(US6): add prioritized enhancement backlog"
+- [x] T067 [US6] Create docs/ENHANCEMENT_BACKLOG.md with categorized enhancement ideas (Reliability, Connectivity, UI, Maintainability, Testing) — at least 2 ideas per category, each with: title, description, platform dependency (ATmega128 / New MCU / Platform-independent), complexity (Low/Medium/High), suggested priority
+- [x] T068 [US6] Add cross-references from enhancement backlog to relevant research.md sections and MCU migration report where applicable
+- [x] T069 [US6] Git commit with message "docs(US6): add prioritized enhancement backlog"
 
 **Checkpoint**: Enhancement roadmap is ready for planning next feature branches.
 

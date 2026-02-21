@@ -11,7 +11,6 @@
 #include "../../MCAL/ADC/ADC_interface.h"
 #include "PT100_interface.h"
 #include "PT100_config.h"
-#include "util/delay.h"
 
 
 // Define known points for voltage and temperature

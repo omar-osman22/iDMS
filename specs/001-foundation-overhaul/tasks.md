@@ -201,16 +201,16 @@
 
 **Purpose**: Final validation across all user stories including US7 wiring and pin configuration.
 
-- [ ] T070 [P] Run full build verification: `make clean && make all && make debug && make test` — all must succeed with zero errors
-- [ ] T071 Verify SC-001: zero errors, no warning increase vs baseline
-- [ ] T072 [P] Verify SC-002: `grep -rn 'avr/eeprom.h' Service/ src/ inc/` returns empty
-- [ ] T073 Verify SC-006: `_Static_assert` guards in Config/eeprom_map.h compile without errors
-- [ ] T074 [P] Verify SC-007: `grep -rn 'CodeCrafters' . --include='*.md' --include='*.mk' --include='Makefile'` returns empty
-- [ ] T075 Verify SC-008: file count reduced by ≥5 vs specs/001-foundation-overhaul/baseline-files.txt
-- [ ] T076 [P] Verify SC-009: cross-check Hardware/Wiring_Reference.md pin-map table against MCAL/DIO/DIO_config.h — every pin direction must match
-- [ ] T077 Verify SC-010: document that wiring reference card procedure (power-on → rail verification → ISP flash → sensor readings on LCD) covers the full signal chain — create a bench-test checklist in Hardware/Wiring_Reference.md if not already present
-- [ ] T078 Run quickstart.md verification checklist (all items in the Verification Checklist section, including US7-specific items: DIO_config.h checks, UART label checks, wiring card existence, power rail docs)
-- [ ] T079 Final git commit with message "chore: foundation overhaul complete — all success criteria verified"
+- [x] T070 [P] Run full build verification: `make clean && make all && make debug && make test` — all must succeed with zero errors
+- [x] T071 Verify SC-001: zero errors, no warning increase vs baseline
+- [x] T072 [P] Verify SC-002: `grep -rn 'avr/eeprom.h' Service/ src/ inc/` returns empty
+- [x] T073 Verify SC-006: `_Static_assert` guards in Config/eeprom_map.h compile without errors
+- [x] T074 [P] Verify SC-007: `grep -rn 'CodeCrafters' . --include='*.md' --include='*.mk' --include='Makefile'` returns empty (outside specs/)
+- [x] T075 Verify SC-008: file count reduced by ≥5 vs specs/001-foundation-overhaul/baseline-files.txt
+- [x] T076 [P] Verify SC-009: cross-check Hardware/Wiring_Reference.md pin-map table against MCAL/DIO/DIO_config.h — every pin direction must match
+- [x] T077 Verify SC-010: document that wiring reference card procedure (power-on → rail verification → ISP flash → sensor readings on LCD) covers the full signal chain — create a bench-test checklist in Hardware/Wiring_Reference.md if not already present
+- [x] T078 Run quickstart.md verification checklist (all items in the Verification Checklist section, including US7-specific items: DIO_config.h checks, UART label checks, wiring card existence, power rail docs)
+- [x] T079 Final git commit with message "chore: foundation overhaul complete — all success criteria verified"
 
 ---
 

@@ -5,7 +5,6 @@
  *          Migrated to unified EEPROM API (INTERNAL_EEPROM.h).
  */
 #include <stdlib.h>
-#include <util/delay.h>
 #include "../Utilities/STD_TYPES.h"
 #include "../MCAL/EEPROM/INTERNAL_EEPROM.h"
 #include "PhoneList.h"

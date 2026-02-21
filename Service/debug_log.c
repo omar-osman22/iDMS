@@ -1,6 +1,5 @@
 #include "debug_log.h"
 #include <string.h>
-#include <avr/io.h>
 
 // Set the default log level
 volatile LogLevel_t g_CurrentLogLevel = LOG_LEVEL_INFO;

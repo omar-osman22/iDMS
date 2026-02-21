@@ -9,7 +9,7 @@
 #include "../Service/debug_log.h"
 #include <string.h>
 #include <stdio.h>
-#include <util/delay.h>
+#include "../MCAL/Delay/delay.h"
 
 // Internal function prototypes
 static ES_t sendSMSWithDelay(const u8* phoneNumber, const u8* message);
@@ -58,7 +58,7 @@ ES_t SMS_SendWithRetry(const u8* phoneNumber, const u8* message, SMSMessageType_
         // Delay before retry (except for last attempt)
         if (attempt < g_SystemConfig.alarmRetryCount - 1) {
             for (u16 i = 0; i < g_SystemConfig.alarmRetryDelayMs; i++) {
-                _delay_ms(1); // Delay in milliseconds
+                MCAL_DelayMs(1); // Delay in milliseconds
             }
         }
     }

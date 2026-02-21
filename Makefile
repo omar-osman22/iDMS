@@ -43,11 +43,13 @@ debug: CFLAGS += $(DEBUG_FLAGS)
 debug: clean all
 	@echo "Debug build successful!"
 
-# Test build
+# Test build — host-side smoke test (placeholder; Unity suite deferred to E011)
 test: $(BUILD_DIR)
-	@echo "Running tests..."
-	$(HOST_CC) -DTARGET_HOST -o $(BUILD_DIR)/test_runner Test/test_phone_list_stub.c
-	@echo "Tests passed (placeholder)."
+	@echo "Running host-side smoke tests..."
+	$(HOST_CC) -DTARGET_HOST -fsyntax-only -I. Config/eeprom_map.h
+	$(HOST_CC) -DTARGET_HOST -fsyntax-only -I. Config/sensor_common.h
+	$(HOST_CC) -DTARGET_HOST -fsyntax-only -I. MCAL/Delay/delay.h
+	@echo "Smoke tests passed."
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

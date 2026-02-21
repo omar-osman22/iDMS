@@ -48,3 +48,19 @@ u8 	 EEPROM_ReadByte(u16 location)
 
 	return EEDR_REG;
 }
+
+void EEPROM_WriteBlock(u16 address, const u8 *data, u16 length)
+{
+	for (u16 i = 0; i < length; i++)
+	{
+		EEPROM_WriteByte(address + i, data[i]);
+	}
+}
+
+void EEPROM_ReadBlock(u16 address, u8 *data, u16 length)
+{
+	for (u16 i = 0; i < length; i++)
+	{
+		data[i] = EEPROM_ReadByte(address + i);
+	}
+}

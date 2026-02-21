@@ -36,4 +36,4 @@ test_results/
 
 # Simulation files
 *.vcd
-*.trace
+*.tracebuild/

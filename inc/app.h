@@ -37,20 +37,20 @@
 #define SMS_list         2
 
 // Debug Configuration
-#define DEBUG_MODE
+// #define DEBUG_MODE // Defined by Makefile for debug target
 #define TEST_ITERATIONS  100
 
 // Enhanced Sensor Reading Structure with Advanced Filtering
 typedef struct {
-    f32 raw;                    // Raw sensor reading
-    f32 filtered;               // IIR filtered sensor reading
-    f32 history[FILTER_WINDOW_SIZE]; // Historical readings for moving average backup
-    u8 historyIndex;           // Current index in history array
-    f32 sum;                   // Running sum for moving average
-    f32 variance;              // Running variance for outlier detection
-    f32 mean;                  // Running mean for statistics
-    u32 sampleCount;           // Total samples processed
-    u8 isCalibrated;           // Calibration status flag
+    u16 rawValue;               // Direct ADC sample (0-1023)
+    f32 filteredValue;          // After IIR filter
+    f32 prevFiltered;           // Previous filtered value (IIR state)
+    f32 variance;               // Running variance for outlier detection
+    f32 mean;                   // Running mean
+    u16 sampleCount;            // Total samples since calibration
+    u8 isCalibrated;            // 1 after calibration complete
+    f32 minValue;               // Minimum observed since reset
+    f32 maxValue;               // Maximum observed since reset
 } SensorReading;
 
 // Temperature and Power Readings Structure
@@ -74,7 +74,7 @@ typedef struct {
 } AppState;
 
 // Global application state
-static AppState appState = {0};
+extern AppState appState;
 
 void updateDisplayReadings(const AppState* state);
 

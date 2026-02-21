@@ -1,6 +1,7 @@
-/*
- * TopWayLCD_Program.c
- *
+/**
+ * @file TopWayLCD_Program.c
+ * @brief TopWay LCD driver implementation
+ * @details Uses UART1 for communication and MCAL_DelayMs for timing.
  *  Created on: Jun 7, 2023
  *      Author: Adel
  */
@@ -9,7 +10,7 @@
 #include "../Utilities/BIT_MATH.h"
 #include "../MCAL/UART/UART_Interface.h"
 #include "../Service/TopWayLCD_Interface.h"
-#include "avr/delay.h"
+#include "../MCAL/Delay/delay.h"
 
 
 void LCD_Init()

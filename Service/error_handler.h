@@ -60,9 +60,11 @@ typedef struct {
     const char* description;
 } ErrorRecord_t;
 
+#include "../Config/eeprom_map.h"
+
 // Error handler configuration
-#define MAX_ERROR_RECORDS 20
-#define ERROR_LOG_EEPROM_ADDRESS 0x400
+#define MAX_ERROR_RECORDS EEPROM_ERRORLOG_MAX_ENTRIES
+#define ERROR_LOG_EEPROM_ADDRESS EEPROM_ERRORLOG_BASE
 
 // Global error handler state
 typedef struct {

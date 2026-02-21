@@ -1,6 +1,7 @@
 #include "inc/app.h"
-#include "../Utilities/Debug/debug_log.h"
+#include "Service/debug_log.h"
 #include "Service/watchdog_timer.h"
+#include "MCAL/Delay/delay.h"
 
 int main(void)
 {
@@ -58,7 +59,7 @@ int main(void)
 #endif
 
         // Delay for 1 second
-        for(u32 i = 0; i < 1000000; i++);
+        MCAL_DelayMs(1000);
     }
     
     return 0;

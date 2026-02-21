@@ -1,8 +1,8 @@
 #ifndef CTCURRENT_CONFIG_H_
 #define CTCURRENT_CONFIG_H_
 
+#include "../Config/sensor_common.h"
 
-#define VREF 4845 // Reference voltage for ADC in mV
 #define ADC_BITS    10
 #define ADC_COUNTS  (1<<ADC_BITS)
 #define VOLTAGE_SOURCE 220.0 // Voltage source

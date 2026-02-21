@@ -12,7 +12,7 @@
 #include "../Service/error_handler.h"
 #include "../Service/watchdog_timer.h"
 #include "../Config/system_config.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 
 // Test function prototypes
 void test_configurationSystem(void);
@@ -201,12 +201,12 @@ void UART_voidInit(void) { /* Stub */ }
 void UART_voidWriteString(u8* str) { printf("%s", (char*)str); }
 void UART_voidWriteData(u8 data) { printf("%c", data); }
 u8 UART_u8ReadData(void) { return 0; }
-void UART_SendStringSync(const char* str) { printf("%s", str); }
+void UART_SendStringSync(u8 const* Copy_pu8Data ) { printf("%s", Copy_pu8Data); }
 
 void LCD_Init(void) { /* Stub */ }
-void LCD_SendString(u32 address, const u8* str) { /* Stub */ }
-void LCD_SendNum16(u32 address, s16 num) { /* Stub */ }
-s16 LCD_GetNum16(u32 address) { return 0; }
+void LCD_SendString(u32 Copy_u32Address , u8 *Copy_u16Str ) { /* Stub */ }
+void LCD_SendNum16(u32 Copy_u32Address , u16 Copy_u16Num) { /* Stub */ }
+u16 LCD_GetNum16(u32 Copy_u32Address) { return 0; }
 void LCD_GetString(u32 address, u8* buffer) { strcpy((char*)buffer, "01234567890"); }
 
 void CT_vInit(void) { /* Stub */ }

@@ -6,7 +6,7 @@
 
 #include "system_config.h"
 #include "../MCAL/EEPROM/INTERNAL_EEPROM.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 #include <string.h>
 
 // Global configuration instance

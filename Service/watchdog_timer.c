@@ -5,7 +5,7 @@
  */
 
 #include "watchdog_timer.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 #include "../Config/system_config.h"
 #include <string.h>
 

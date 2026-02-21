@@ -1,11 +1,11 @@
-/*
- * error_handler.c
- *
- * Implementation of centralized error handling system
+/**
+ * @file error_handler.c
+ * @brief Implementation of centralized error handling system
+ * @details Logs errors to EEPROM using the unified EEPROM API and handles recovery.
  */
 
 #include "error_handler.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 #include "../MCAL/EEPROM/INTERNAL_EEPROM.h"
 #include "../Service/enhanced_sms.h"
 #include "../Service/watchdog_timer.h"

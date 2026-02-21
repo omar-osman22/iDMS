@@ -54,15 +54,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Delete Application/main.c, Application/inc/app.h, Application/src/app.c, and remove the empty Application/ directory tree
-- [ ] T013 [P] [US1] Delete Utilities/LinkedList.c and Utilities/LinkedList.h
-- [ ] T014 [P] [US1] Delete placeholder files IDMS/README.md and Debug/README.md, then remove empty IDMS/ directory
-- [ ] T015 [P] [US1] Delete one-time migration scripts organize-files.sh and update_includes.sh
-- [ ] T016 [US1] Relocate Debug/debug_log.c to Service/debug_log.c and Debug/debug_log.h to Service/debug_log.h (overwrite if Service/ copies already exist; verify content is identical first)
-- [ ] T017 [US1] Delete stale Eclipse build files: Debug/makefile, Debug/subdir.mk, Debug/sources.mk, Debug/objects.mk
-- [ ] T018 [P] [US1] Delete build artifacts: Debug/CodeCrafters.lss and all Debug/*.d files (ADC_Program.d, DIO.d, INTERNAL_EEPROM.d, LM35_Program.d, main.d, PhoneList.d, SIM_prog.d, TopWayLCD_Program.d, UART_Prog.d)
-- [ ] T019 [US1] Verify file count reduced by ≥5 vs baseline: `find . -name '*.c' -o -name '*.h' | grep -v specs | grep -v .specify | wc -l`
-- [ ] T020 [US1] Git commit with message "feat(US1): remove duplicate and orphaned files"
+- [x] T012 [US1] Delete Application/main.c, Application/inc/app.h, Application/src/app.c, and remove the empty Application/ directory tree
+- [x] T013 [P] [US1] Delete Utilities/LinkedList.c and Utilities/LinkedList.h
+- [x] T014 [P] [US1] Delete placeholder files IDMS/README.md and Debug/README.md, then remove empty IDMS/ directory
+- [x] T015 [P] [US1] Delete one-time migration scripts organize-files.sh and update_includes.sh
+- [x] T016 [US1] Relocate Debug/debug_log.c to Service/debug_log.c and Debug/debug_log.h to Service/debug_log.h (overwrite if Service/ copies already exist; verify content is identical first)
+- [x] T017 [US1] Delete stale Eclipse build files: Debug/makefile, Debug/subdir.mk, Debug/sources.mk, Debug/objects.mk
+- [x] T018 [P] [US1] Delete build artifacts: Debug/CodeCrafters.lss and all Debug/*.d files (ADC_Program.d, DIO.d, INTERNAL_EEPROM.d, LM35_Program.d, main.d, PhoneList.d, SIM_prog.d, TopWayLCD_Program.d, UART_Prog.d)
+- [x] T019 [US1] Verify file count reduced by ≥5 vs baseline: `find . -name '*.c' -o -name '*.h' | grep -v specs | grep -v .specify | wc -l`
+- [x] T020 [US1] Git commit with message "feat(US1): remove duplicate and orphaned files"
 
 **Checkpoint**: Repository is clean. Only canonical files remain.
 
@@ -76,21 +76,21 @@
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Update MCAL/EEPROM/INTERNAL_EEPROM.h to include Config/eeprom_map.h and add the `#define` aliases if not already done in T007 (verify integration)
-- [ ] T022 [US2] Update Service/data_logger.c to include Config/eeprom_map.h and use EEPROM_DATA_LOG_BASE instead of hardcoded 0x300
-- [ ] T023 [P] [US2] Update Service/error_handler.c to include Config/eeprom_map.h and use EEPROM_ERROR_LOG_BASE instead of hardcoded 0x400
-- [ ] T024 [US2] Migrate Service/PhoneList.c from `avr/eeprom.h` to use MCAL/EEPROM/INTERNAL_EEPROM.h API (replace eeprom_write_byte/eeprom_read_byte with EEPROM_WriteByte/EEPROM_ReadByte, and eeprom_write_block/eeprom_read_block with EEPROM_WriteBlock/EEPROM_ReadBlock)
-- [ ] T025 [US2] Move `static AppState appState = {0}` from inc/app.h to src/app.c, replace with `extern AppState appState;` declaration in inc/app.h
-- [ ] T026 [US2] Fix SensorReading struct in inc/app.h to include all 9 fields per data-model.md (rawValue, filteredValue, prevFiltered, variance, mean, sampleCount, isCalibrated, minValue, maxValue) — this resolves the 8 build errors
-- [ ] T027 [P] [US2] Remove `#define VREF` from Service/CTcurrent_config.h and Service/PT100_config.h, replace with `#include "Config/sensor_common.h"` in both files
-- [ ] T028 [US2] Replace `#include <avr/delay.h>` in Service/TopWayLCD_Program.c with `#include "MCAL/Delay/delay.h"` and replace `_delay_ms()` calls with `MCAL_DelayMs()`
-- [ ] T029 [P] [US2] Replace `#include <avr/delay.h>` in Service/SIM_prog.c with `#include "MCAL/Delay/delay.h"` and replace `_delay_ms()` calls with `MCAL_DelayMs()`
-- [ ] T030 [US2] Replace the bare `for(u32 i = 0; i < 1000000; i++);` delay loop in main.c with `MCAL_DelayMs()` call and add `#include "MCAL/Delay/delay.h"`
-- [ ] T031 [US2] Fix sendAlarmMessage() mixed-UART bug in src/app.c — ensure all SMS AT commands and payload data use UART0 functions consistently (replace UART_voidWriteData calls with UART_SendStringSync or equivalent UART0 function); see research.md §9 for details
-- [ ] T032 [US2] Verify `make all` compiles with zero errors: `make all 2>&1 | grep -c error` returns 0
-- [ ] T033 [US2] Count remaining compiler warnings: `make all 2>&1 | grep -c warning` — document result; target: no increase vs baseline (≤29). New/modified files MUST have zero warnings with `-Wall -Wextra`
-- [ ] T034 [P] [US2] Add brief header-comment block to all modified MCAL and Service files (INTERNAL_EEPROM.h, PhoneList.c, data_logger.c, error_handler.c, TopWayLCD_Program.c, SIM_prog.c) per Constitution Principle VII
-- [ ] T035 [US2] Write host-side smoke test: compile MCAL/EEPROM/INTERNAL_EEPROM.h + Config/eeprom_map.h + Config/sensor_common.h with `gcc -DTARGET_HOST -fsyntax-only` — must succeed with zero errors
+- [x] T021 [US2] Update MCAL/EEPROM/INTERNAL_EEPROM.h to include Config/eeprom_map.h and add the `#define` aliases if not already done in T007 (verify integration)
+- [x] T022 [US2] Update Service/data_logger.c to include Config/eeprom_map.h and use EEPROM_DATA_LOG_BASE instead of hardcoded 0x300
+- [x] T023 [P] [US2] Update Service/error_handler.c to include Config/eeprom_map.h and use EEPROM_ERROR_LOG_BASE instead of hardcoded 0x400
+- [x] T024 [US2] Migrate Service/PhoneList.c from `avr/eeprom.h` to use MCAL/EEPROM/INTERNAL_EEPROM.h API (replace eeprom_write_byte/eeprom_read_byte with EEPROM_WriteByte/EEPROM_ReadByte, and eeprom_write_block/eeprom_read_block with EEPROM_WriteBlock/EEPROM_ReadBlock)
+- [x] T025 [US2] Move `static AppState appState = {0}` from inc/app.h to src/app.c, replace with `extern AppState appState;` declaration in inc/app.h
+- [x] T026 [US2] Fix SensorReading struct in inc/app.h to include all 9 fields per data-model.md (rawValue, filteredValue, prevFiltered, variance, mean, sampleCount, isCalibrated, minValue, maxValue) — this resolves the 8 build errors
+- [x] T027 [P] [US2] Remove `#define VREF` from Service/CTcurrent_config.h and Service/PT100_config.h, replace with `#include "Config/sensor_common.h"` in both files
+- [x] T028 [US2] Replace `#include <avr/delay.h>` in Service/TopWayLCD_Program.c with `#include "MCAL/Delay/delay.h"` and replace `_delay_ms()` calls with `MCAL_DelayMs()`
+- [x] T029 [P] [US2] Replace `#include <avr/delay.h>` in Service/SIM_prog.c with `#include "MCAL/Delay/delay.h"` and replace `_delay_ms()` calls with `MCAL_DelayMs()`
+- [x] T030 [US2] Replace the bare `for(u32 i = 0; i < 1000000; i++);` delay loop in main.c with `MCAL_DelayMs()` call and add `#include "MCAL/Delay/delay.h"`
+- [x] T031 [US2] Fix sendAlarmMessage() mixed-UART bug in src/app.c — ensure all SMS AT commands and payload data use UART0 functions consistently (replace UART_voidWriteData calls with UART_SendStringSync or equivalent UART0 function); see research.md §9 for details
+- [x] T032 [US2] Verify `make all` compiles with zero errors: `make all 2>&1 | grep -c error` returns 0
+- [x] T033 [US2] Count remaining compiler warnings: `make all 2>&1 | grep -c warning` — document result; target: no increase vs baseline (≤29). New/modified files MUST have zero warnings with `-Wall -Wextra`
+- [x] T034 [P] [US2] Add brief header-comment block to all modified MCAL and Service files (INTERNAL_EEPROM.h, PhoneList.c, data_logger.c, error_handler.c, TopWayLCD_Program.c, SIM_prog.c) per Constitution Principle VII
+- [x] T035 [US2] Write host-side smoke test: compile MCAL/EEPROM/INTERNAL_EEPROM.h + Config/eeprom_map.h + Config/sensor_common.h with `gcc -DTARGET_HOST -fsyntax-only` — must succeed with zero errors
 - [ ] T036 [US2] Git commit with message "fix(US2): resolve EEPROM overlap, API mismatch, static-in-header, avr header leaks, and mixed-UART bug"
 
 **Checkpoint**: Firmware compiles cleanly. All known defects are resolved.

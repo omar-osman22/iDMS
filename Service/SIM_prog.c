@@ -1,11 +1,12 @@
-/*
- * SIM_prog.c
- *
+/**
+ * @file SIM_prog.c
+ * @brief SIM800L GSM module driver implementation
+ * @details Uses UART0 for AT commands and MCAL_DelayMs for timing.
  *  Created on: Feb 14, 2022
  *      Author: pc
  */
 
-#include	<avr/delay.h>
+#include	"../MCAL/Delay/delay.h"
 #include	<string.h>
 
 #include 	"STD_TYPES.h"
@@ -109,17 +110,17 @@ ES_t SIM_estSendSMS(u8 *Copy_u8PhoneNumber, u8 *Copy_u8SMS)
 		if(SIM_estCheckIfReady() == ES_OK)
 		{
 			SIM_voidSendCommand("AT+CMGF=1\r");
-			_delay_ms(1000);
+			MCAL_DelayMs(1000);
 			if(SIM_estGetResponse() == ES_OK)
 			{
 				SIM_voidSendCommand("AT+CMGS=\"");
 				SIM_voidSendCommand(Copy_u8PhoneNumber);
 				SIM_voidSendCommand("\"\r");
-				_delay_ms(1000);
+				MCAL_DelayMs(1000);
 				SIM_voidSendCommand(Copy_u8SMS);
-				_delay_ms(100);
+				MCAL_DelayMs(100);
 				SIM_voidSendCommand("\r");
-				_delay_ms(1000);
+				MCAL_DelayMs(1000);
 				Local_enuerrorState = SIM_estGetResponse();
 			}
 		}
@@ -144,7 +145,7 @@ ES_t SIM_estSendLocation(u8 *Copy_u8PhoneNumber, u8 *Copy_u8Latitude, u8 *Copy_u
 				SIM_voidSendCommand("AT+CMGS=\"");
 				SIM_voidSendCommand(Copy_u8PhoneNumber);
 				SIM_voidSendCommand("\"\r");
-				_delay_ms(10); //https://maps.go[dot]ogle.com/?q=
+				MCAL_DelayMs(10); //https://maps.go[dot]ogle.com/?q=
 				//https://maps.google.com/?q=30.3052624,31.7730866&z=30
 				SIM_voidSendCommand("Please delete \"[dot]\" form the link below then open it.\rhttps://maps.go[dot]ogle.com/?q="); //https://www.google.com/maps/dir/?api=1&parameters
 				SIM_voidSendCommand(Copy_u8Latitude);
@@ -191,30 +192,30 @@ void SIM_SendSMS(u8 const *Copy_u8PhoneNumber, u8 const *Copy_u8SMS)
 {
 	SIM_voidSendCommand("AT+CMGF=1\r");
 	UART_SendByteSynch(10);
-	_delay_ms(100);
+	MCAL_DelayMs(100);
 	SIM_voidSendCommand("AT+CMGS=\"");
 	UART_SendByteSynch(10);
-	_delay_ms(100);
+	MCAL_DelayMs(100);
 	SIM_voidSendCommand(Copy_u8PhoneNumber);
 	UART_SendByteSynch(10);
-	_delay_ms(100);
+	MCAL_DelayMs(100);
 	SIM_voidSendCommand("\"\r");
 	UART_SendByteSynch(10);
-	_delay_ms(100);
+	MCAL_DelayMs(100);
 	SIM_voidSendCommand(Copy_u8SMS);
 	UART_SendByteSynch(10);
-	_delay_ms(100);
+	MCAL_DelayMs(100);
 	SIM_voidSendCommand("\r");
 	UART_SendByteSynch(10);
-	_delay_ms(100);
+	MCAL_DelayMs(100);
 
 }
 
 void SIM_MakeCall(u8 *Copy_u8PhoneNumber)
 {
 	SIM_voidSendCommand("ATD");
-	//_delay_ms(10);
+	//MCAL_DelayMs(10);
 	SIM_voidSendCommand(Copy_u8PhoneNumber);
-	//_delay_ms(10);
+	//MCAL_DelayMs(10);
 	SIM_voidSendCommand(";\r\n");
 }

@@ -4,7 +4,7 @@
 #include "../Utilities/STD_TYPES.h"
 #include "../MCAL/UART/UART_Interface.h"
 
-#define DEBUG_MODE
+// #define DEBUG_MODE
 // Define debug levels
 typedef enum {
     LOG_LEVEL_NONE,
@@ -45,6 +45,8 @@ void DEBUG_LogInit(LogLevel_t initialLevel);
     #define DEBUG_LogInfo(message)                  ((void)0)
     #define DEBUG_LogDebug(message)                 ((void)0)
     #define DEBUG_LogValueInt(level, message, value) ((void)0)
+    #define DEBUG_LogMessageWithValue(level, message, value) ((void)0)
+    #define DEBUG_LogMessage(level, message)        ((void)0)
 #endif
 
 #endif /* DEBUG_LOG_H_ */

@@ -1,5 +1,9 @@
 #include "../inc/app.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
+#include <stdio.h>
+
+// Global application state
+AppState appState = {0};
 
 // Private function prototypes
 static void initializeSystem(void);
@@ -25,14 +29,12 @@ void APP_Init(void)
     appState.phoneNumber[0] = '\0';
     
     // Initialize sensor readings and filter buffers
-    for(u8 i = 0; i < FILTER_WINDOW_SIZE; i++) {
-        appState.readings.temperature.history[i] = 0;
-        appState.readings.current.history[i] = 0;
-    }
-    appState.readings.temperature.historyIndex = 0;
-    appState.readings.current.historyIndex = 0;
-    appState.readings.temperature.sum = 0;
-    appState.readings.current.sum = 0;
+    appState.readings.temperature.prevFiltered = 0;
+    appState.readings.current.prevFiltered = 0;
+    appState.readings.temperature.minValue = 1000.0f;
+    appState.readings.temperature.maxValue = -1000.0f;
+    appState.readings.current.minValue = 1000.0f;
+    appState.readings.current.maxValue = -1000.0f;
     appState.readings.lastAlarmTime = 0;
     appState.readings.alarmActive = 0;
     
@@ -82,25 +84,30 @@ static void updateSensorReadings(SystemReadings* readings)
     updateSensorFilter(&readings->current, currentReading);
     
     // Calculate power
-    readings->power = CT_f32CalcPower(readings->current.filtered);
+    readings->power = CT_f32CalcPower(readings->current.filteredValue);
 }
 
 static void updateSensorFilter(SensorReading* sensor, f32 newReading)
 {
     // Apply filter to new reading
-    sensor->filtered = (sensor->filtered * (FILTER_WINDOW_SIZE - 1) + newReading) / FILTER_WINDOW_SIZE;
+    sensor->prevFiltered = sensor->filteredValue;
+    sensor->filteredValue = (sensor->filteredValue * (FILTER_WINDOW_SIZE - 1) + newReading) / FILTER_WINDOW_SIZE;
+    
+    // Update min/max
+    if (sensor->filteredValue < sensor->minValue) sensor->minValue = sensor->filteredValue;
+    if (sensor->filteredValue > sensor->maxValue) sensor->maxValue = sensor->filteredValue;
 }
 
 void updateDisplayReadings(const AppState* state)
 {
     // Update temperature displays with offset
-    s16 displayTemp = (s16)(state->readings.temperature.filtered + TEMPERATURE_OFFSET);
+    s16 displayTemp = (s16)(state->readings.temperature.filteredValue + TEMPERATURE_OFFSET);
     LCD_SendNum16(In, displayTemp);
-    LCD_SendNum16(In_Num, (s16)state->readings.temperature.filtered);
+    LCD_SendNum16(In_Num, (s16)state->readings.temperature.filteredValue);
     
     // Update current displays
-    LCD_SendNum16(Out, (s16)(state->readings.current.filtered * 100)); // Scaled for display
-    LCD_SendNum16(Out_Num, (s16)state->readings.current.filtered);
+    LCD_SendNum16(Out, (s16)(state->readings.current.filteredValue * 100)); // Scaled for display
+    LCD_SendNum16(Out_Num, (s16)state->readings.current.filteredValue);
 
     // Clear input buffer if needed
     if(LCD_GetNum16(Clear_BUFF)) {
@@ -116,20 +123,20 @@ static void checkSafetyThresholds(AppState* state)
     u8 alarmCondition = 0;
     
     // Check temperature thresholds using filtered value
-    if (state->readings.temperature.filtered > MAX_TEMPERATURE || 
-        state->readings.temperature.filtered < MIN_TEMPERATURE) {
+    if (state->readings.temperature.filteredValue > MAX_TEMPERATURE || 
+        state->readings.temperature.filteredValue < MIN_TEMPERATURE) {
         alarmCondition = 1;
         snprintf((char*)alarmMessage, SMS_BUFFER_SIZE, 
                 "TEMP ALARM: T=%.1f C",
-                state->readings.temperature.filtered);
+                state->readings.temperature.filteredValue);
     }
     
     // Check current thresholds using filtered value
-    if (state->readings.current.filtered > MAX_CURRENT) {
+    if (state->readings.current.filteredValue > MAX_CURRENT) {
         alarmCondition = 1;
         snprintf((char*)alarmMessage, SMS_BUFFER_SIZE,
                 "CURRENT ALARM: I=%.1fA P=%.1fW",
-                state->readings.current.filtered,
+                state->readings.current.filteredValue,
                 state->readings.power);
     }
     
@@ -260,11 +267,11 @@ static void handlePhoneListOperations(List* phoneList, const char* phoneNumber, 
 
 static void sendAlarmMessage(const u8* phoneNumber, const u8* message)
 {
-    UART_SendStringSync("AT+CMGS=\"");
-    while(*phoneNumber) UART_voidWriteData(*phoneNumber++);
-    UART_SendStringSync("\"\r\n");
-    while(*message) UART_voidWriteData(*message++);
-    UART_voidWriteData(0x1A); // Send Ctrl+Z to end message
+    UART_SendStringSync((const u8*)"AT+CMGS=\"");
+    while(*phoneNumber) UART_SendByteSynch(*phoneNumber++);
+    UART_SendStringSync((const u8*)"\"\r\n");
+    while(*message) UART_SendByteSynch(*message++);
+    UART_SendByteSynch(0x1A); // Send Ctrl+Z to end message
 }
 
 static void printListToLCD(List* phoneList)
@@ -278,4 +285,17 @@ static void clearLCDDisplay(const char* clear)
     {
         LCD_SendString(CList_address + (128 * i), clear);
     }
+}
+
+// Utility Functions
+f32 APP_GetFilteredTemperature(void) {
+    return appState.readings.temperature.filteredValue;
+}
+
+f32 APP_GetFilteredCurrent(void) {
+    return appState.readings.current.filteredValue;
+}
+
+f32 APP_GetCalculatedPower(void) {
+    return appState.readings.power;
 }

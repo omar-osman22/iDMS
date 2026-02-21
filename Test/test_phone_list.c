@@ -10,7 +10,7 @@
 #include "../Utilities/BIT_MATH.h"
 #include "../Service/PhoneList.h"
 #include "../MCAL/UART/UART_Interface.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 #include "../Service/TopWayLCD_Interface.h"
 
 // Buffer for terminal input

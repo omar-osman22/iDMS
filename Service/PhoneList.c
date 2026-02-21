@@ -1,14 +1,20 @@
+/**
+ * @file PhoneList.c
+ * @brief Phone number management service using EEPROM
+ * @details Manages a linked list of phone numbers stored in EEPROM for SMS/Call alerts.
+ *          Migrated to unified EEPROM API (INTERNAL_EEPROM.h).
+ */
 #include <stdlib.h>
 #include <util/delay.h>
 #include "../Utilities/STD_TYPES.h"
-#include <avr/eeprom.h>
+#include "../MCAL/EEPROM/INTERNAL_EEPROM.h"
 #include "PhoneList.h"
 #include "../MCAL/UART/UART_Interface.h"
 #include "../Service/TopWayLCD_Interface.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 
 #define PHONE_NUMBER_LENGTH 11
-#define EEPROM_START_ADDRESS 0
+#define EEPROM_START_ADDRESS EEPROM_PHONE_LIST_BASE
 #define INVALID_EEPROM_VALUE 0xFF
 
 // Static variables
@@ -142,7 +148,7 @@ void StoreListToEEPROM(List* l)
 	
 	// Store list size
 	DEBUG_LogInfo("Writing list size to EEPROM");
-	eeprom_write_byte((u8*)current_eeprom_address, l->size);
+	EEPROM_WriteByte(current_eeprom_address, l->size);
 	current_eeprom_address++;
 
 	Node* current = l->Head;
@@ -154,14 +160,12 @@ void StoreListToEEPROM(List* l)
 		DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Writing to EEPROM address: ", current_eeprom_address);
 		DEBUG_LogMessageWithValue(LOG_LEVEL_DEBUG, "Phone number: ", current->value);
 		
-		eeprom_write_block(current->value, 
-						  (void*)current_eeprom_address, 
-						  PHONE_NUMBER_LENGTH);
+		EEPROM_WriteBlock(current_eeprom_address, current->value, PHONE_NUMBER_LENGTH);
 		current_eeprom_address += PHONE_NUMBER_LENGTH;
 		
 		// Store SMSCALL flag
 		DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Writing SMSCALL flag: ", current->SMSCALL);
-		eeprom_write_byte((u8*)current_eeprom_address, current->SMSCALL);
+		EEPROM_WriteByte(current_eeprom_address, current->SMSCALL);
 		current_eeprom_address++;
 		
 		current = current->Next;
@@ -184,7 +188,7 @@ void ReadListFromEEPROM(List* l)
 	current_eeprom_address = EEPROM_START_ADDRESS;
 	
 	// Read list size
-	u8 listSize = eeprom_read_byte((const u8*)current_eeprom_address);
+	u8 listSize = EEPROM_ReadByte(current_eeprom_address);
 	current_eeprom_address++;
 
 	DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Stored list size: ", listSize);
@@ -203,16 +207,14 @@ void ReadListFromEEPROM(List* l)
 		DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Reading from EEPROM address: ", current_eeprom_address);
 		
 		// Read phone number
-		eeprom_read_block(phoneNumber, 
-						 (const void*)current_eeprom_address, 
-						 PHONE_NUMBER_LENGTH);
+		EEPROM_ReadBlock(current_eeprom_address, phoneNumber, PHONE_NUMBER_LENGTH);
 		current_eeprom_address += PHONE_NUMBER_LENGTH;
 		phoneNumber[PHONE_NUMBER_LENGTH] = '\0';
 		
 		DEBUG_LogMessageWithValue(LOG_LEVEL_DEBUG, "Read phone number: ", phoneNumber);
 		
 		// Read SMSCALL flag
-		u8 smscall = eeprom_read_byte((const u8*)current_eeprom_address);
+		u8 smscall = EEPROM_ReadByte(current_eeprom_address);
 		DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Read SMSCALL flag: ", smscall);
 		current_eeprom_address++;
 		
@@ -271,7 +273,7 @@ void AddNumToEEPROM(const u8* PhoneNum)
 	
 	// Find the current list size stored in EEPROM
 	current_eeprom_address = EEPROM_START_ADDRESS;
-	u8 listSize = eeprom_read_byte((const u8*)current_eeprom_address);
+	u8 listSize = EEPROM_ReadByte(current_eeprom_address);
 	
 	DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Current list size in EEPROM: ", listSize);
 	
@@ -284,7 +286,7 @@ void AddNumToEEPROM(const u8* PhoneNum)
 	// Update list size
 	listSize++;
 	DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "New list size: ", listSize);
-	eeprom_write_byte((u8*)current_eeprom_address, listSize);
+	EEPROM_WriteByte(current_eeprom_address, listSize);
 	
 	// Calculate where to add the new number (after all existing numbers)
 	current_eeprom_address = EEPROM_START_ADDRESS + 1; // Skip past size byte
@@ -293,12 +295,12 @@ void AddNumToEEPROM(const u8* PhoneNum)
 	DEBUG_LogValueInt(LOG_LEVEL_DEBUG, "Writing to EEPROM address: ", current_eeprom_address);
 	
 	// Store phone number
-	eeprom_write_block(PhoneNum, (void*)current_eeprom_address, PHONE_NUMBER_LENGTH);
+	EEPROM_WriteBlock(current_eeprom_address, PhoneNum, PHONE_NUMBER_LENGTH);
 	current_eeprom_address += PHONE_NUMBER_LENGTH;
 	
 	// For now, store as Calling_list (1) by default
 	DEBUG_LogInfo("Setting as Calling_list type (1)");
-	eeprom_write_byte((u8*)current_eeprom_address, 1);
+	EEPROM_WriteByte(current_eeprom_address, 1);
 	
 	DEBUG_LogInfo("Phone number added to EEPROM successfully");
 }

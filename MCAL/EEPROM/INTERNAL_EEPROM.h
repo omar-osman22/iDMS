@@ -14,6 +14,7 @@
 #define INTERNAL_EEPROM_H_
 
 #include "../../Utilities/STD_TYPES.h"
+#include "../../Config/eeprom_map.h"
 
 void EEPROM_INIT();
 

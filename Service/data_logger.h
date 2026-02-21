@@ -8,6 +8,7 @@
 #define DATA_LOGGER_H_
 
 #include "../Utilities/STD_TYPES.h"
+#include "../Config/eeprom_map.h"
 
 // Data log entry structure
 typedef struct {
@@ -19,8 +20,8 @@ typedef struct {
 } DataLogEntry_t;
 
 // Configuration constants
-#define MAX_LOG_ENTRIES     50    // Maximum entries in circular buffer
-#define LOG_EEPROM_START    0x300 // EEPROM address for log storage
+#define MAX_LOG_ENTRIES     EEPROM_DATALOG_MAX_ENTRIES    // Maximum entries in circular buffer
+#define LOG_EEPROM_START    EEPROM_DATALOG_BASE // EEPROM address for log storage
 #define LOG_ENTRY_SIZE      sizeof(DataLogEntry_t)
 
 // Alarm flag bits

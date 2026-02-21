@@ -1,12 +1,12 @@
-/*
- * data_logger.c
- *
- * Implementation of data logging system
+/**
+ * @file data_logger.c
+ * @brief Implementation of data logging system
+ * @details Logs sensor readings to EEPROM using the unified EEPROM API.
  */
 
 #include "data_logger.h"
 #include "../MCAL/EEPROM/INTERNAL_EEPROM.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 #include <string.h>
 
 // Global data logger instance

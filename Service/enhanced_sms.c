@@ -6,7 +6,7 @@
 
 #include "enhanced_sms.h"
 #include "SIM_interface.h"
-#include "../Debug/debug_log.h"
+#include "../Service/debug_log.h"
 #include <string.h>
 #include <stdio.h>
 #include <util/delay.h>
